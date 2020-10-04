@@ -1,0 +1,207 @@
+import React, {
+  FC,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
+
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
+import { makeStyles } from '@material-ui/core/styles';
+
+import { Music } from 'store/music/types';
+
+interface Props {
+  list: Music[],
+  setValue: (value?: string) => void,
+}
+const useStyles = makeStyles((theme) => ({
+  wrap: {
+    display: 'flex',
+    flexDirection: 'column',
+    width: '100%',
+    textAlign: 'center',
+  },
+  label: {
+    display: 'flex',
+    width: '100%',
+    paddingTop: '100%',
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderRadius: 4,
+    borderColor: theme.palette.grey['400'],
+    backgroundSize: 'contain',
+    backgroundRepeat: 'no-repeat',
+    cursor: 'pointer',
+  },
+}));
+
+interface Size {
+  width: number,
+  height: number,
+}
+
+const getUrlFromFile = async (file: File) => new Promise<string>((resolve) => {
+  const reader = new FileReader();
+  reader.onload = () => {
+    resolve(`${reader.result}`);
+  };
+  reader.readAsDataURL(file);
+});
+
+const checkImageSize = async (src: string) => new Promise<Size | null>((resolve) => {
+  const image = new Image();
+  image.onload = () => {
+    const { width, height } = image;
+    resolve({ width, height });
+  };
+  image.onerror = () => {
+    resolve(null);
+  };
+  image.src = src;
+});
+
+const initialSize = { width: 0, height: 0 };
+
+interface ContextAnchor {
+  mouseX: null | number,
+  mouseY: null | number,
+}
+
+const initialContextAnchor: ContextAnchor = {
+  mouseX: null,
+  mouseY: null,
+};
+
+const ImageInput: FC<Props> = ({
+  setValue,
+  list,
+}) => {
+  const [contextAnchor, setContextAnchor] = React.useState<ContextAnchor>(initialContextAnchor);
+  const [imgUrl, setImgUrl] = useState<string | undefined>(undefined);
+  const [size, setSize] = useState({ ...initialSize });
+  const classes = useStyles();
+
+  const handleChangeUrl = useCallback(async (url?: string, file?: File) => {
+    if (!url) {
+      setImgUrl(url);
+      setSize({ ...initialSize });
+      return;
+    }
+    const nextSize = await checkImageSize(url);
+    if (!nextSize) {
+      return;
+    }
+    setImgUrl(url);
+    setSize(nextSize);
+    if (file) {
+      setValue((file as any).path);
+    } else {
+      setValue(undefined);
+    }
+  }, [setValue]);
+
+  const handleChangeFile = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.persist();
+    e.preventDefault();
+    const [file] = e.target.files || [];
+    if (!file) {
+      return;
+    }
+
+    const url = await getUrlFromFile(file);
+    if (url) {
+      handleChangeUrl(url, file);
+    }
+    e.target.value = '';
+    e.target.files = null;
+  }, [handleChangeUrl]);
+
+  const defaultValue = useMemo(() => {
+    if (list.length !== 1) {
+      return undefined;
+    }
+    return list[0].metadata.picture[0];
+  }, [list]);
+
+  useEffect(() => {
+    handleChangeUrl(defaultValue);
+  }, [defaultValue, handleChangeUrl]);
+
+  const handlePictureRightClick = (e: React.MouseEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    setContextAnchor({
+      mouseX: e.clientX - 2,
+      mouseY: e.clientY - 4,
+    });
+  };
+
+  const handleClose = useCallback(() => {
+    setContextAnchor({ ...initialContextAnchor });
+  }, []);
+
+  const handleDelete = useCallback(() => {
+    setValue('');
+    handleChangeUrl('');
+    handleClose();
+  }, [handleClose, setValue, handleChangeUrl]);
+
+  const handleCopy = useCallback(() => {
+    handleClose();
+  }, [handleClose]);
+
+  const handlePaste = useCallback(() => {
+    handleClose();
+  }, [handleClose]);
+
+  return (
+    <>
+      <div className={classes.wrap}>
+        <label
+          htmlFor='file'
+          className={classes.label}
+          style={imgUrl ? { backgroundImage: `url('${imgUrl}')` } : undefined}
+          onContextMenu={handlePictureRightClick}
+        >
+          <input
+            type='file'
+            id='file'
+            hidden
+            accept='image/jpeg, image/png'
+            onChange={handleChangeFile}
+          />
+        </label>
+        {imgUrl === undefined && (
+          <div>
+            (유지)
+          </div>
+        )}
+        {imgUrl && (
+          <div>
+            {size.width}
+            x
+            {size.height}
+          </div>
+        )}
+      </div>
+      <Menu
+        keepMounted
+        open={contextAnchor.mouseY !== null}
+        onClose={handleClose}
+        anchorReference='anchorPosition'
+        anchorPosition={
+          contextAnchor.mouseY !== null && contextAnchor.mouseX !== null
+            ? { top: contextAnchor.mouseY, left: contextAnchor.mouseX }
+            : undefined
+        }
+      >
+        <MenuItem onClick={handleCopy}>복사</MenuItem>
+        <MenuItem onClick={handlePaste}>붙여넣기</MenuItem>
+        <MenuItem onClick={handleDelete}>제거</MenuItem>
+      </Menu>
+    </>
+  );
+};
+
+export default ImageInput;
