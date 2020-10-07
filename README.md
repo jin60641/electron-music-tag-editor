@@ -2,22 +2,4 @@
 
 elecrton-music-tag-editor is a ID3-Tag editor in electron without other dependencies.
 
-### `yarn start`
-
-Runs the app in the development mode.<br />
-Open Electron App to view it.
-
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
-
-### `yarn test`
-
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `yarn build`
-
-Builds the app for production to the `dist` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.<br />
+![image](https://user-images.githubusercontent.com/9072743/95275203-d5c28d80-0882-11eb-95fd-cfa224396f5c.png)
