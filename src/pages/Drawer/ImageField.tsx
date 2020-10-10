@@ -14,6 +14,7 @@ import { Music } from 'store/music/types';
 
 interface Props {
   list: Music[],
+  ids: string,
   setValue: (value?: string) => void,
 }
 const useStyles = makeStyles((theme) => ({
@@ -77,6 +78,7 @@ const initialContextAnchor: ContextAnchor = {
 
 const ImageInput: FC<Props> = ({
   setValue,
+  ids,
   list,
 }) => {
   const [contextAnchor, setContextAnchor] = React.useState<ContextAnchor>(initialContextAnchor);
@@ -120,18 +122,16 @@ const ImageInput: FC<Props> = ({
   }, [handleChangeUrl]);
 
   const defaultValue = useMemo(() => {
-    if (list.length !== 1) {
+    if (!ids || list.length !== 1) {
       return undefined;
     }
     return list[0].metadata.picture[0];
-  }, [list]);
+  }, [list, ids]);
 
   useEffect(() => {
-    if (defaultValue !== imgUrl) {
-      setImgUrl(undefined);
-    }
+    setImgUrl(n => n === defaultValue ? n : undefined);
     handleChangeUrl(defaultValue);
-  }, [defaultValue, imgUrl, handleChangeUrl]);
+  }, [defaultValue, handleChangeUrl]);
 
   const handlePictureRightClick = (e: React.MouseEvent<HTMLLabelElement>) => {
     e.preventDefault();

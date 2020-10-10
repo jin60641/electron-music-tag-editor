@@ -1,4 +1,6 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, {
+  useCallback, useEffect, useMemo, useState,
+} from 'react';
 
 import Button from '@material-ui/core/Button';
 import Divider from '@material-ui/core/Divider';
@@ -14,6 +16,7 @@ import clsx from 'clsx';
 import { useDispatch, useSelector } from 'react-redux';
 
 import actions from 'store/music/actions';
+import { Music } from 'store/music/types';
 import { RootState } from 'store/types';
 
 import ImageField from './ImageField';
@@ -88,9 +91,13 @@ type Values = {
   [key in FieldKeys]: Option;
 };
 
+type Options = {
+  [key in FieldKeys]: Option[];
+};
+
 const defaultOption = { label: '(유지)', value: undefined };
 
-const defaultValues: Values = {
+const initialValues: Values = {
   title: defaultOption,
   artist: defaultOption,
   album: defaultOption,
@@ -101,13 +108,32 @@ const defaultValues: Values = {
   track: defaultOption,
 };
 
+const initialOptions = {
+  title: [],
+  artist: [],
+  album: [],
+  comment: [],
+  albumartist: [],
+  genre: [],
+  composer: [],
+  track: [],
+};
+
+const uniqueList = (key: FieldKeys, list: Music[]) => list
+  .reduce((arr, { metadata: { [key]: data } }) => ((data && !arr.find((item) => item.value === `${data}`))
+    ? arr.concat({ value: data, label: `${data}` })
+    : arr
+  ), [] as Option[]);
+
 const Drawer: React.FC = () => {
   const dispatch = useDispatch();
-  const [values, setValues] = useState<Values>(defaultValues);
+  const [values, setValues] = useState<Values>(initialValues);
+  const [options, setOptions] = useState<Options>(initialOptions);
   const [picture, setPicture] = useState<string | undefined>(undefined);
   const classes = useStyles();
   const theme = useTheme();
   const list = useSelector(selector);
+  const ids = useMemo(() => list.map(({ path }) => path).join(','), [list]);
   const [open, setOpen] = useState(true);
 
   const handleDrawerOpen = useCallback(() => {
@@ -129,10 +155,19 @@ const Drawer: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (list.length !== 1) {
-      setValues(defaultValues);
+    if (ids) {
+      const nextOptions = Object.keys(initialOptions).reduce((obj, key) => ({
+        ...obj,
+        [key as FieldKeys]: uniqueList(key as FieldKeys, list),
+      }), {} as Options);
+      setOptions(nextOptions);
+      const nextValues = Object.entries(nextOptions).reduce((obj, [key, v]) => ({
+        ...obj,
+        [key as FieldKeys]: v.length === 1 ? v[0] : defaultOption,
+      }), {} as typeof values);
+      setValues(nextValues);
     }
-  }, [list.length]);
+  }, [ids, list]);
 
   useEffect(() => {
     if (list.length >= 1) {
@@ -179,7 +214,7 @@ const Drawer: React.FC = () => {
               <TextField
                 name={field.key}
                 label={field.label}
-                list={list}
+                options={options[field.key]}
                 value={values[field.key]}
                 onChange={handleChangeText}
               />
@@ -187,6 +222,7 @@ const Drawer: React.FC = () => {
           ))}
           <ListItem>
             <ImageField
+              ids={ids}
               setValue={setPicture}
               list={list}
             />
