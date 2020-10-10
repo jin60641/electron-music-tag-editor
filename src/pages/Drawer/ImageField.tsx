@@ -34,6 +34,7 @@ const useStyles = makeStyles((theme) => ({
     backgroundSize: 'contain',
     backgroundRepeat: 'no-repeat',
     cursor: 'pointer',
+    boxSizing: 'content-box',
   },
 }));
 
@@ -126,8 +127,11 @@ const ImageInput: FC<Props> = ({
   }, [list]);
 
   useEffect(() => {
+    if (defaultValue !== imgUrl) {
+      setImgUrl(undefined);
+    }
     handleChangeUrl(defaultValue);
-  }, [defaultValue, handleChangeUrl]);
+  }, [defaultValue, imgUrl, handleChangeUrl]);
 
   const handlePictureRightClick = (e: React.MouseEvent<HTMLLabelElement>) => {
     e.preventDefault();

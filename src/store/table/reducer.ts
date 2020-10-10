@@ -44,6 +44,6 @@ const tableReducer = createReducer(initialState)
   .handleAction(tableActions.setColumns, (state, action) => ({
     ...state,
     columns: action.payload,
-  }))
+  }));
 
 export default persistReducer(persistConfig, tableReducer);

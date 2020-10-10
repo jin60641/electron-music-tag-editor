@@ -2,11 +2,11 @@ import { createAction } from 'typesafe-actions';
 
 import {
   Actions,
+  RemoveColumnPayload,
   SetColumnOrderPayload,
+  SetColumnsPayload,
   SetColumnWidthPayload,
   SetSortPayload,
-  SetColumnsPayload,
-  RemoveColumnPayload,
 } from './types';
 
 const setColumnWidth = createAction(Actions.SET_COLUMN_WIDTH)<SetColumnWidthPayload>();

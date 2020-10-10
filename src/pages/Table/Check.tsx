@@ -17,26 +17,43 @@ const Checkbox = withStyles((theme) => ({
 }))(MuiCheckbox);
 
 interface Props {
-  cellData?: boolean;
+  isChecked?: boolean;
+  id?: string;
 }
 
-const selector = ({ music: { list } }: RootState) => list.every(({ isSelected }) => isSelected);
-
-const Picture: React.FC<Props> = ({ cellData }) => {
-  const isRoot = (cellData === undefined);
+const Check: React.FC<Props> = ({ isChecked, id }) => {
+  const isRoot = (isChecked === undefined);
   const dispatch = useDispatch();
-  const isChecked = useSelector(isRoot ? selector : () => cellData);
+  const { checked, index } = useSelector(({
+    music: {
+      list,
+    },
+  }: RootState) => isRoot ? ({
+    checked: list.every(({ isSelected }) => isSelected),
+  }) : ({
+    checked: isChecked,
+    index: list.findIndex(({ path }) => path === id),
+  }));
 
-  const handleChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    dispatch(actions.selectMusicAll(event.target.checked));
-  }, [dispatch]);
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    if (isRoot) {
+      dispatch(actions.selectMusicAll(e.target.checked));
+    } else if (index) {
+      dispatch(actions.selectMusicAdd(index));
+    }
+  }, [dispatch, index, isRoot]);
+
+  const handleClick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+  }, []);
 
   return (
     <Checkbox
-      checked={isChecked}
-      onChange={isRoot ? handleChange : undefined}
+      checked={checked}
+      onClick={handleClick}
+      onChange={handleChange}
     />
   );
 };
 
-export default Picture;
+export default Check;

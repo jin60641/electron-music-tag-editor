@@ -22,7 +22,7 @@ export enum Actions {
   SET_COLUMN_ORDER = 'SET_COLUMN_ORDER',
   SET_SORT = 'SET_SORT',
   REMOVE_COLUMN = 'REMOVE_COLUMN',
-  SET_COLUMNS = 'SET_COLUMNS', // TODO: 사용자 정의 컬럼 모달용
+  SET_COLUMNS = 'SET_COLUMNS' // TODO: 사용자 정의 컬럼 모달용
 }
 
 export type SetSortPayload = Pick<TableState, 'sortBy' | 'sortDirection'>;

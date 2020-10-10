@@ -6,6 +6,7 @@ export interface MusicState {
 
 export enum Actions {
   SELECT_MUSIC = 'SELECT_MUSIC',
+  SELECT_MUSIC_ADD = 'SELECT_MUSIC_ADD',
   SELECT_MUSIC_ALL = 'SELECT_MUSIC_ALL',
   RESET_MUSIC = 'RESET_MUSIC',
 

@@ -2,7 +2,6 @@ import React, {
   useCallback, useEffect, useMemo, useState,
 } from 'react';
 
-import Avatar from '@material-ui/core/Avatar';
 import { makeStyles } from '@material-ui/core/styles';
 import { getType } from 'typesafe-actions';
 
@@ -39,8 +38,13 @@ const Picture: React.FC<Props> = ({ rowData }) => {
     }
   }, [rowData, src]);
 
+  const url = useMemo(() => validUrl || '/images/album-cover.png', [validUrl]);
+
   useEffect(() => {
     if (src) {
+      if (src !== url) {
+        setValidUrl(null);
+      }
       const image = new Image();
       image.onload = () => {
         setValidUrl(src);
@@ -50,21 +54,13 @@ const Picture: React.FC<Props> = ({ rowData }) => {
     } else {
       setValidUrl(null);
     }
-  }, [src, onError]);
+  }, [src, url, onError]);
 
   return (
-    <>
-      {!validUrl ? (
-        <Avatar
-          className={classes.root}
-        />
-      ) : (
-        <div
-          className={classes.root}
-          style={{ backgroundImage: `url('${validUrl}')` }}
-        />
-      )}
-    </>
+    <div
+      className={classes.root}
+      style={{ backgroundImage: `url('${url}')` }}
+    />
   );
 };
 

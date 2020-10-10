@@ -80,7 +80,8 @@ const COLUMNS: Columns = {
     disableResize: true,
     cellDataGetter: ({ rowData, dataKey }) => (
       <Check
-        cellData={rowData[dataKey]}
+        isChecked={rowData[dataKey]}
+        id={rowData.path}
       />
     ),
   },
@@ -199,8 +200,14 @@ const Table: React.FC = () => {
     ) * (sortDirection === SortDirection.ASC ? -1 : 1);
   }), [sortBy, sortDirection, list]);
 
-  const handleClickRow = useCallback(({ index }: RowMouseEventHandlerParams) => {
-    dispatch(musicActions.selectMusic(index));
+  const handleClickRow = useCallback(({ index, event }: RowMouseEventHandlerParams) => {
+    if (event.ctrlKey || event.metaKey) {
+      dispatch(musicActions.selectMusicAdd(index));
+    } else if (event.shiftKey) {
+      // TODO: multiple selection
+    } else {
+      dispatch(musicActions.selectMusic(index));
+    }
   }, [dispatch]);
 
   const getRowClassName: TableProps['rowClassName'] = ({ index }) => clsx(

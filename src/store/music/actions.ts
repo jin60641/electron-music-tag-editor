@@ -15,6 +15,12 @@ const selectMusic = createAction(
 number
 >();
 
+const selectMusicAdd = createAction(
+  Actions.SELECT_MUSIC_ADD,
+)<
+number
+>();
+
 const selectMusicAll = createAction(
   Actions.SELECT_MUSIC_ALL,
 )<
@@ -51,4 +57,12 @@ const saveMusic = createAsyncAction(
   Actions.SAVE_MUSIC_FAILURE,
 )<SaveMusicRequestPayload, SaveMusicSuccessPayload, undefined>();
 
-export default { openMusic, addMusic, resetMusic, selectMusic, selectMusicAll, saveMusic };
+export default {
+  openMusic,
+  addMusic,
+  resetMusic,
+  selectMusic,
+  selectMusicAll,
+  saveMusic,
+  selectMusicAdd,
+};

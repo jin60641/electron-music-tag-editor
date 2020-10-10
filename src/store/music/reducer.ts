@@ -15,14 +15,20 @@ const musicReducer = createReducer<MusicState>(initialState)
     ...state,
     list: [],
   }))
-  .handleAction(musicActions.selectMusic, (state, action) => {
-    const list = [...state.list];
-    list[action.payload].isSelected = !list[action.payload].isSelected;
-    return {
-      ...state,
-      list,
-    };
-  })
+  .handleAction(musicActions.selectMusic, (state, action) => ({
+    ...state,
+    list: state.list.map((music, i) => ({
+      ...music,
+      isSelected: i === action.payload ? !music.isSelected : false,
+    })),
+  }))
+  .handleAction(musicActions.selectMusicAdd, (state, action) => ({
+    ...state,
+    list: state.list.map((music, i) => ({
+      ...music,
+      isSelected: i === action.payload ? !music.isSelected : music.isSelected
+    })),
+  }))
   .handleAction(musicActions.selectMusicAll, (state, action) => ({
     ...state,
     list: state.list.map((music) => ({ ...music, isSelected: action.payload })),
