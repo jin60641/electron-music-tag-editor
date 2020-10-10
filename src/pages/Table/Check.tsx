@@ -24,16 +24,13 @@ interface Props {
 const Check: React.FC<Props> = ({ isChecked, id }) => {
   const isRoot = (isChecked === undefined);
   const dispatch = useDispatch();
-  const { checked, index } = useSelector(({
-    music: {
-      list,
-    },
-  }: RootState) => isRoot ? ({
-    checked: list.every(({ isSelected }) => isSelected),
-  }) : ({
-    checked: isChecked,
-    index: list.findIndex(({ path }) => path === id),
-  }));
+  const { checked, index } = useSelector(({ music: { list } }: RootState) => (
+    isRoot ? ({ checked: list.every(({ isSelected }) => isSelected) })
+      : ({
+        checked: isChecked,
+        index: list.findIndex(({ path }) => path === id),
+      })
+  ));
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     if (isRoot) {

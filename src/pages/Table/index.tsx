@@ -15,6 +15,7 @@ import {
   SortDirection,
   TableProps,
 } from 'react-virtualized';
+import { getType } from 'typesafe-actions';
 
 import musicActions from 'store/music/actions';
 import tableActions from 'store/table/actions';
@@ -42,6 +43,7 @@ const useStyles = makeStyles((theme) => ({
     minWidth: '100vw',
     height: '100vh',
   },
+  isFileDragging: {},
   headerCell: {
     display: 'flex',
     flexDirection: 'row',
@@ -49,7 +51,7 @@ const useStyles = makeStyles((theme) => ({
     overflow: 'hidden',
     position: 'relative',
   },
-  isDragging: { overflow: 'initial' },
+  isHeaderDragging: { overflow: 'initial' },
   table: {
     fontFamily: theme.typography.fontFamily,
     minWidth: '100vw',
@@ -176,7 +178,8 @@ const Table: React.FC = () => {
   } = useSelector(selector, shallowEqual);
   const classes = useStyles();
 
-  const [isDragging, setIsDragging] = useState(false);
+  const [isFileDragging, setIsFileDragging] = useState(false);
+  const [isHeaderDragging, setIsHeaderDragging] = useState(false);
   const [contextAnchor, setContextAnchor] = React.useState<{
     mouseX: null | number;
     mouseY: null | number;
@@ -221,11 +224,11 @@ const Table: React.FC = () => {
   }, [dispatch]);
 
   const handleDragStart = useCallback(() => {
-    setIsDragging(true);
+    setIsHeaderDragging(true);
   }, []);
 
   const handleDragEnd = useCallback((result) => {
-    setIsDragging(false);
+    setIsHeaderDragging(false);
     if (!result.destination) {
       return;
     }
@@ -268,8 +271,39 @@ const Table: React.FC = () => {
     rowCount: rows.length,
   };
 
+  const handleDragEnter = useCallback(() => {
+    setIsFileDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback(() => {
+    setIsFileDragging(false);
+  }, []);
+
+  const handleDragOver = useCallback((e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
+    setIsFileDragging(true);
+  }, []);
+
+  const handleDrop = useCallback((e) => {
+    setIsFileDragging(false);
+    if (e.dataTransfer.files?.length) {
+      window.bridge.ipc.send(
+        getType(musicActions.openMusic.request),
+        [...e.dataTransfer.files].map(({ path }) => path),
+      );
+      e.dataTransfer.clearData();
+    }
+  }, []);
+
   return (
-    <div className={classes.main}>
+    <div
+      onDragEnter={handleDragEnter}
+      onDragLeave={handleDragLeave}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
+      className={clsx(classes.main, isFileDragging && classes.isFileDragging)}
+    >
       <AutoSizer>
         {({ height }) => (
           <DragDropContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
@@ -286,7 +320,7 @@ const Table: React.FC = () => {
                   <TableHeaderCell
                     {...columns[rubric.source.index]}
                     columnIndex={rubric.source.index}
-                    isDragging={isDragging}
+                    isDragging={isHeaderDragging}
                     isPlaceholder
                   />
                 </div>
@@ -308,7 +342,10 @@ const Table: React.FC = () => {
                     rowGetter={({ index }) => rows[index]}
                     {...tableProps}
                     rowClassName={getRowClassName}
-                    headerClassName={clsx(classes.headerCell, isDragging && classes.isDragging)}
+                    headerClassName={clsx(
+                      classes.headerCell,
+                      isHeaderDragging && classes.isHeaderDragging,
+                    )}
                   >
                     {columns.map(({
                       className,
@@ -322,7 +359,7 @@ const Table: React.FC = () => {
                             {...headerProps}
                             {...columns[index]}
                             columnIndex={index}
-                            isDragging={isDragging}
+                            isDragging={isHeaderDragging}
                             onRightClick={handleHeaderRightClick}
                           />
                         )}

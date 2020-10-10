@@ -19,14 +19,14 @@ const musicReducer = createReducer<MusicState>(initialState)
     ...state,
     list: state.list.map((music, i) => ({
       ...music,
-      isSelected: i === action.payload ? !music.isSelected : false,
+      isSelected: i === action.payload,
     })),
   }))
   .handleAction(musicActions.selectMusicAdd, (state, action) => ({
     ...state,
     list: state.list.map((music, i) => ({
       ...music,
-      isSelected: i === action.payload ? !music.isSelected : music.isSelected
+      isSelected: i === action.payload ? !music.isSelected : music.isSelected,
     })),
   }))
   .handleAction(musicActions.selectMusicAll, (state, action) => ({

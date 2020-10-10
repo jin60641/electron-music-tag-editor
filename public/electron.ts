@@ -240,6 +240,32 @@ const createWindow = () => {
   const menu = Menu.buildFromTemplate(template as MenuItemConstructorOptions[]);
   Menu.setApplicationMenu(menu)
 
+  ipcMain.on('OPEN_MUSIC', (event, dirPaths) => {
+    dirPaths.forEach((dirPath) => {
+      if (fs.lstatSync(dirPath).isDirectory()) {
+        glob.sync(path.join(dirPath, '**/*.mp3')).forEach((filePath) => {
+          fs.readFile(filePath, (err, buffer) => {
+            if (!err) {
+              win.webContents.send('ADD_MUSIC', ({
+                path: filePath,
+                buffer: buffer
+              }));
+            }
+          });
+        });
+      } else {
+        fs.readFile(dirPath, (err, buffer) => {
+          if (!err) {
+            win.webContents.send('ADD_MUSIC', ({
+              path: dirPath,
+              buffer: buffer
+            }));
+          }
+        });
+      }
+    });
+  });
+
   ipcMain.on('ADD_MUSIC', (event, filePath) => {
     fs.readFile(filePath, (err, buffer) => {
       if (!err) {

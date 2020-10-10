@@ -46,7 +46,7 @@ const useStyles = makeStyles((theme) => ({
   drawerHeader: {
     display: 'flex',
     alignItems: 'center',
-    height: 64,
+    minHeight: 64,
     paddingRight: theme.spacing(1),
     paddingLeft: theme.spacing(2),
     flexDirection: 'row',
