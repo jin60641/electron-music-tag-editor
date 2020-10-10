@@ -143,7 +143,6 @@ const Drawer: React.FC = () => {
   }, [handleDrawerClose, handleDrawerOpen, list.length]);
 
   const handleClickSave = useCallback(() => {
-    console.log(picture);
     const filePaths = list.map(({ path }) => path);
     const metadata = Object.entries(values).reduce((obj, [key, option]) => (
       (!!option && option.value !== undefined) ? ({

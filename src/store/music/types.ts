@@ -44,8 +44,7 @@ export interface Metadata extends Pick<IAudioMetadata['common'],
 'title' |
 'artist' |
 'album' |
-'albumartist' |
-'year'
+'albumartist'
 > {
   genre: string,
   composer: string,

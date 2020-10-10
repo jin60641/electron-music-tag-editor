@@ -7,6 +7,7 @@ import TableCell from '@material-ui/core/TableCell';
 import TableSortLabel from '@material-ui/core/TableSortLabel';
 import clsx from 'clsx';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
+import { DraggableCore } from 'react-draggable';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   AutoSizer,
@@ -32,6 +33,19 @@ const useStyles = makeStyles((theme) => ({
     minWidth: '100vw',
     height: '100vh',
   },
+  cell: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  handle: {
+    width: 18,
+    position: 'absolute',
+    right: 0,
+    height: '100%',
+    cursor: 'col-resize',
+  },
   table: {
     fontFamily: theme.typography.fontFamily,
     '&:focus': { outline: 'none' },
@@ -54,8 +68,9 @@ const useStyles = makeStyles((theme) => ({
   placeholder: {},
 }));
 
-interface ColumnItem extends Omit<ColumnProps, 'dataKey'> {
+interface ColumnItem extends Omit<ColumnProps, 'dataKey' | 'width'> {
   dataKey: keyof Metadata | 'isSelected'
+  width?: number;
   numeric?: boolean;
 }
 
@@ -66,7 +81,6 @@ const cellDataGetter: ColumnProps['cellDataGetter'] = ({
 
 const COLUMNS: ColumnItem[] = [
   {
-    width: 68,
     label: <Check />,
     dataKey: 'isSelected',
     cellDataGetter: ({ rowData, dataKey }) => (
@@ -76,7 +90,6 @@ const COLUMNS: ColumnItem[] = [
     ),
   },
   {
-    width: 68,
     label: <Picture />,
     dataKey: 'picture',
     cellDataGetter: ({ rowData }) => (
@@ -86,50 +99,42 @@ const COLUMNS: ColumnItem[] = [
     ),
   },
   {
-    width: 300,
     label: '곡명',
     dataKey: 'title',
     cellDataGetter,
   },
   {
-    width: 300,
     label: '앨범',
     dataKey: 'album',
     cellDataGetter,
   },
   {
-    width: 150,
     label: '아티스트',
     dataKey: 'artist',
     cellDataGetter,
   },
   {
-    width: 180,
     label: '앨범 아티스트',
     dataKey: 'albumartist',
     cellDataGetter,
   },
   {
-    width: 150,
     label: '장르',
     dataKey: 'genre',
     cellDataGetter,
   },
   {
-    width: 180,
     label: '작곡가',
     dataKey: 'composer',
     cellDataGetter,
   },
   {
-    width: 150,
     label: '트랙',
     dataKey: 'track',
     numeric: true,
     cellDataGetter,
   },
   {
-    width: 300,
     label: '코멘트',
     dataKey: 'comment',
     cellDataGetter,
@@ -144,6 +149,7 @@ interface CellProps extends TableCellProps {}
 
 interface HeaderProps extends TableHeaderProps, Pick<TableCellProps, 'columnIndex'> {
   isPlaceholder?: boolean,
+  dataKey: ColumnItem['dataKey'],
 }
 
 const selector = ({ music: { list } }: RootState) => list;
@@ -154,6 +160,19 @@ const initialContextAnchor = {
 };
 
 const Table: React.FC = () => {
+  const [widths, setWidths] = useState({
+    isSelected: 68,
+    picture: 68,
+    title: 300,
+    album: 300,
+    artist: 180,
+    albumartist: 180,
+    genre: 150,
+    composer: 180,
+    track: 150,
+    comment: 300,
+  });
+  const width = Object.values(widths).reduce((a, b) => a + b);
   const [contextAnchor, setContextAnchor] = React.useState<{
     mouseX: null | number;
     mouseY: null | number;
@@ -164,7 +183,14 @@ const Table: React.FC = () => {
   const list = useSelector(selector);
   const [columnOrder, setColumnOrder] = useState(Array(COLUMNS.length).fill(0).map((_, i) => i));
   const classes = useStyles();
-  const columns = columnOrder.map((i) => COLUMNS[i]);
+  const columns = columnOrder.map((i) => ({ ...COLUMNS[i], width: widths[COLUMNS[i].dataKey] }));
+
+  const resizeColumn = ({ dataKey, deltaX }: { dataKey: ColumnItem['dataKey'], deltaX: number }) => {
+    setWidths((prevWidths) => ({
+      ...prevWidths,
+      [dataKey]: prevWidths[dataKey] + deltaX,
+    }));
+  };
 
   const handleHeaderRightClick = useCallback((
     e: React.MouseEvent<HTMLDivElement>,
@@ -244,26 +270,36 @@ const Table: React.FC = () => {
     }
 
     return (
-      <Draggable
-        key={dataKey}
-        draggableId={dataKey}
-        index={columnIndex}
-      >
-        {(draggableContext) => (
-          <TableCell
-            onContextMenu={(e) => handleHeaderRightClick(e, columnIndex)}
-            component='div'
-            className={clsx(classes.tableCell, classes.flexContainer, classes.noClick)}
-            variant='head'
-            align={columns[columnIndex].numeric || false ? 'right' : 'left'}
-            innerRef={draggableContext.innerRef}
-            {...draggableContext.draggableProps}
-            {...draggableContext.dragHandleProps}
-          >
-            {inner}
-          </TableCell>
-        )}
-      </Draggable>
+      <div className={classes.cell}>
+        <Draggable
+          key={dataKey}
+          draggableId={dataKey}
+          index={columnIndex}
+        >
+          {(draggableContext) => (
+            <TableCell
+              onContextMenu={(e) => handleHeaderRightClick(e, columnIndex)}
+              component='div'
+              className={clsx(classes.tableCell, classes.flexContainer, classes.noClick)}
+              variant='head'
+              align={columns[columnIndex].numeric || false ? 'right' : 'left'}
+              innerRef={draggableContext.innerRef}
+              {...draggableContext.draggableProps}
+              {...draggableContext.dragHandleProps}
+            >
+              {inner}
+            </TableCell>
+          )}
+        </Draggable>
+        <DraggableCore
+          onDrag={(_, { deltaX }) => resizeColumn({
+            dataKey,
+            deltaX,
+          })}
+        >
+          <div className={classes.handle} />
+        </DraggableCore>
+      </div>
     );
   };
 
@@ -291,7 +327,7 @@ const Table: React.FC = () => {
   return (
     <div className={classes.main}>
       <AutoSizer>
-        {({ height, width }) => (
+        {({ height }) => (
           <DragDropContext onDragEnd={handleDragEnd}>
             <Droppable
               droppableId='Table'
@@ -333,11 +369,12 @@ const Table: React.FC = () => {
                       className,
                       dataKey,
                       ...other
-                    }: any, index: number) => (
+                    }, index: number) => (
                       <Column
                         key={`Column-${dataKey}`}
                         headerRenderer={(headerProps) => headerRenderer({
                           ...headerProps,
+                          dataKey,
                           columnIndex: index,
                         })}
                         className={clsx(classes.flexContainer, className)}
@@ -360,7 +397,7 @@ const Table: React.FC = () => {
                   >
                     {contextAnchor.columnIndex && (
                       <MenuItem onClick={handleCloseContextMenu}>
-                        {`'${COLUMNS[contextAnchor.columnIndex].label}' 제거`}
+                        {`'${columns[contextAnchor.columnIndex].label}' 제거`}
                       </MenuItem>
                     )}
                     <MenuItem onClick={handleCloseContextMenu}>정렬</MenuItem>
