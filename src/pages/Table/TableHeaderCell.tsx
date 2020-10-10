@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { makeStyles } from '@material-ui/core/styles';
 import TableCell, { TableCellProps } from '@material-ui/core/TableCell';
@@ -6,7 +6,7 @@ import TableSortLabel from '@material-ui/core/TableSortLabel';
 import clsx from 'clsx';
 import { Draggable } from 'react-beautiful-dnd';
 import { DraggableCore } from 'react-draggable';
-import { useDispatch, useSelector } from 'react-redux';
+import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import {
   TableCellProps as RVTableCellProps,
   TableHeaderProps as RVTableHeaderProps,
@@ -75,11 +75,11 @@ const useStyles = makeStyles({
 
 const selector = ({
   table: {
-    columnWidth,
+    columns,
     headerHeight,
   },
 }: RootState) => ({
-  columnWidth,
+  columns,
   headerHeight,
 });
 
@@ -99,11 +99,12 @@ const TableHeaderCell: React.FC<TableHeaderCellProps> = ({
   const dispatch = useDispatch();
 
   const classes = useStyles();
-  const { headerHeight, columnWidth } = useSelector(selector);
+  const { headerHeight, columns } = useSelector(selector, shallowEqual);
+  const columnWidth = useMemo(() => columns[columnIndex].width, [columns, columnIndex]);
   const resizeColumn = useCallback((deltaX: number) => {
     dispatch(tableActions.setColumnWidth({
       dataKey,
-      width: Math.max(columnWidth[dataKey] + deltaX, 52),
+      width: Math.max(columnWidth + deltaX, 52),
     }));
   }, [columnWidth, dataKey, dispatch]);
 
@@ -127,7 +128,7 @@ const TableHeaderCell: React.FC<TableHeaderCellProps> = ({
         {...tableCellProps}
         style={{
           height: headerHeight,
-          width: columnWidth[dataKey],
+          width: columnWidth,
         }}
       >
         {label}
@@ -155,7 +156,7 @@ const TableHeaderCell: React.FC<TableHeaderCellProps> = ({
             {...draggableContext.dragHandleProps}
             style={{
               ...draggableContext.draggableProps.style,
-              width: columnWidth[dataKey],
+              width: columnWidth,
             }}
           >
             {label}

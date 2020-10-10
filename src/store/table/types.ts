@@ -4,9 +4,13 @@ import { Metadata } from 'store/music/types';
 
 export type DataKey = keyof Metadata | 'isSelected';
 
+interface Column {
+  dataKey: DataKey,
+  width: number,
+}
+
 export interface TableState {
-  columnWidth: ColumnWidth,
-  columnOrder: number[],
+  columns: Column[],
   headerHeight: number,
   rowHeight: number,
   sortBy: keyof Metadata,
@@ -25,22 +29,42 @@ export type ColumnWidth = {
   [key in DataKey]: number;
 };
 
+const initialColumns: Column[] = [{
+  dataKey: 'isSelected',
+  width: 68,
+}, {
+  dataKey: 'picture',
+  width: 68,
+}, {
+  dataKey: 'title',
+  width: 300,
+}, {
+  dataKey: 'album',
+  width: 300,
+}, {
+  dataKey: 'artist',
+  width: 180,
+}, {
+  dataKey: 'albumartist',
+  width: 180,
+}, {
+  dataKey: 'genre',
+  width: 150,
+}, {
+  dataKey: 'composer',
+  width: 180,
+}, {
+  dataKey: 'track',
+  width: 150,
+}, {
+  dataKey: 'comment',
+  width: 300,
+}];
+
 export const initialState: TableState = {
-  columnWidth: {
-    isSelected: 68,
-    picture: 68,
-    title: 300,
-    album: 300,
-    artist: 180,
-    albumartist: 180,
-    genre: 150,
-    composer: 180,
-    track: 150,
-    comment: 300,
-  },
   headerHeight: 65,
   rowHeight: 56,
-  columnOrder: Array(10).fill(0).map((_, i) => i), // TODO: generate by columns constant list length
+  columns: [...initialColumns],
   sortBy: 'title',
   sortDirection: SortDirection.ASC,
 };

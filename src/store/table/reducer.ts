@@ -11,20 +11,22 @@ const persistConfig = {
 };
 
 const tableReducer = createReducer(initialState)
-  .handleAction(tableActions.setColumnWidth, (state, action) => ({
-    ...state,
-    columnWidth: {
-      ...state.columnWidth,
-      [action.payload.dataKey]: action.payload.width,
-    },
-  }))
-  .handleAction(tableActions.setColumnOrder, (state, action) => {
-    const columnOrder = [...state.columnOrder];
-    const [removed] = columnOrder.splice(action.payload.source, 1);
-    columnOrder.splice(action.payload.destination, 0, removed);
+  .handleAction(tableActions.setColumnWidth, (state, action) => {
+    const columns = [...state.columns];
+    const idx = columns.findIndex(({ dataKey }) => dataKey === action.payload.dataKey);
+    columns[idx].width = action.payload.width;
     return {
       ...state,
-      columnOrder,
+      columns,
+    };
+  })
+  .handleAction(tableActions.setColumnOrder, (state, action) => {
+    const columns = [...state.columns];
+    const [removed] = columns.splice(action.payload.source, 1);
+    columns.splice(action.payload.destination, 0, removed);
+    return {
+      ...state,
+      columns,
     };
   })
   .handleAction(tableActions.setSort, (state, action) => ({

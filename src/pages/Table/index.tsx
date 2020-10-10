@@ -26,6 +26,17 @@ import Picture from './Picture';
 import TableBodyCell from './TableBodyCell';
 import TableHeaderCell from './TableHeaderCell';
 
+interface ColumnItem extends Omit<ColumnProps, 'dataKey' | 'width'> {
+  dataKey: DataKey,
+  disableResize?: boolean;
+  width?: number;
+  numeric?: boolean;
+}
+
+type Columns = {
+  [key in DataKey]: ColumnItem;
+};
+
 const useStyles = makeStyles((theme) => ({
   main: {
     minWidth: '100vw',
@@ -56,20 +67,13 @@ const useStyles = makeStyles((theme) => ({
   tableRowHover: { '&:hover': { backgroundColor: theme.palette.grey[200] } },
 }));
 
-interface ColumnItem extends Omit<ColumnProps, 'dataKey' | 'width'> {
-  dataKey: DataKey,
-  disableResize?: boolean;
-  width?: number;
-  numeric?: boolean;
-}
-
 const cellDataGetter: ColumnProps['cellDataGetter'] = ({
   dataKey,
   rowData,
 }) => rowData.metadata[dataKey];
 
-const COLUMNS: ColumnItem[] = [
-  {
+const COLUMNS: Columns = {
+  isSelected: {
     label: <Check />,
     dataKey: 'isSelected',
     disableSort: true,
@@ -80,7 +84,7 @@ const COLUMNS: ColumnItem[] = [
       />
     ),
   },
-  {
+  picture: {
     label: <Picture />,
     disableSort: true,
     disableResize: true,
@@ -91,54 +95,53 @@ const COLUMNS: ColumnItem[] = [
       />
     ),
   },
-  {
+  title: {
     label: '곡명',
     dataKey: 'title',
     cellDataGetter,
   },
-  {
+  album: {
     label: '앨범',
     dataKey: 'album',
     cellDataGetter,
   },
-  {
+  artist: {
     label: '아티스트',
     dataKey: 'artist',
     cellDataGetter,
   },
-  {
+  albumartist: {
     label: '앨범 아티스트',
     dataKey: 'albumartist',
     cellDataGetter,
   },
-  {
+  genre: {
     label: '장르',
     dataKey: 'genre',
     cellDataGetter,
   },
-  {
+  composer: {
     label: '작곡가',
     dataKey: 'composer',
     cellDataGetter,
   },
-  {
+  track: {
     label: '트랙',
     dataKey: 'track',
     numeric: true,
     cellDataGetter,
   },
-  {
+  comment: {
     label: '코멘트',
     dataKey: 'comment',
     cellDataGetter,
   },
-];
+};
 
 const selector = ({
   music: { list },
   table: {
-    columnOrder,
-    columnWidth,
+    columns,
     sortBy,
     sortDirection,
     rowHeight,
@@ -146,8 +149,10 @@ const selector = ({
   },
 }: RootState) => ({
   list,
-  columnOrder,
-  columnWidth,
+  columns: columns.map((column) => ({
+    ...column,
+    ...COLUMNS[column.dataKey],
+  })),
   sortBy,
   sortDirection,
   rowHeight,
@@ -163,10 +168,9 @@ const Table: React.FC = () => {
   const dispatch = useDispatch();
   const {
     list,
-    columnWidth,
-    columnOrder,
     sortBy,
     sortDirection,
+    columns,
     rowHeight,
     headerHeight,
   } = useSelector(selector, shallowEqual);
@@ -181,7 +185,7 @@ const Table: React.FC = () => {
   const width = Math.max(
     document.documentElement.clientWidth || 0,
     window.innerWidth || 0,
-    Object.values(columnWidth).reduce((a, b) => a + b),
+    columns.reduce((a, b) => a + b.width, 0),
   );
 
   const rows = useMemo(() => list.sort((a, b) => {
@@ -195,11 +199,6 @@ const Table: React.FC = () => {
       : -1
     ) * (sortDirection === SortDirection.ASC ? -1 : 1);
   }), [sortBy, sortDirection, list]);
-
-  const columns = columnOrder.map((i) => ({
-    ...COLUMNS[i],
-    width: columnWidth[COLUMNS[i].dataKey],
-  }));
 
   const handleClickRow = useCallback(({ index }: RowMouseEventHandlerParams) => {
     dispatch(musicActions.selectMusic(index));
