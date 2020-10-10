@@ -20,7 +20,9 @@ export interface TableState {
 export enum Actions {
   SET_COLUMN_WIDTH = 'SET_COLUMN_WIDTH',
   SET_COLUMN_ORDER = 'SET_COLUMN_ORDER',
-  SET_SORT = 'SET_SORT'
+  SET_SORT = 'SET_SORT',
+  REMOVE_COLUMN = 'REMOVE_COLUMN',
+  SET_COLUMNS = 'SET_COLUMNS', // TODO: 사용자 정의 컬럼 모달용
 }
 
 export type SetSortPayload = Pick<TableState, 'sortBy' | 'sortDirection'>;
@@ -78,3 +80,7 @@ export interface SetColumnOrderPayload {
   source: number,
   destination: number,
 }
+
+export type RemoveColumnPayload = number;
+
+export type SetColumnsPayload = TableState['columns'];

@@ -22,10 +22,7 @@ export interface TableHeaderCellProps extends RVTableHeaderProps, Pick<RVTableCe
   dataKey: DataKey,
   disableResize?: boolean,
   numeric?: boolean,
-  onRightClick?: (
-    e: React.MouseEvent<HTMLDivElement>,
-    columnIndex: number,
-  ) => void,
+  onRightClick?: (e: React.MouseEvent<HTMLDivElement>, columnIndex: number) => void,
   isDragging?: boolean,
 }
 

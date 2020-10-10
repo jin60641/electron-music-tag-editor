@@ -128,7 +128,6 @@ const COLUMNS: Columns = {
   track: {
     label: '트랙',
     dataKey: 'track',
-    numeric: true,
     cellDataGetter,
   },
   comment: {
@@ -238,13 +237,19 @@ const Table: React.FC = () => {
     e: React.MouseEvent<HTMLDivElement>,
     columnIndex: number,
   ) => {
-    e.preventDefault();
     setContextAnchor({
       mouseX: e.clientX - 2,
       mouseY: e.clientY - 4,
       columnIndex,
     });
   }, []);
+
+  const handleClickRemoveColumn = useCallback(() => {
+    if (contextAnchor.columnIndex) {
+      handleCloseContextMenu();
+      dispatch(tableActions.removeColumn(contextAnchor.columnIndex));
+    }
+  }, [dispatch, contextAnchor, handleCloseContextMenu]);
 
   const tableProps = {
     rowHeight,
@@ -338,7 +343,7 @@ const Table: React.FC = () => {
                     }
                   >
                     {contextAnchor.columnIndex && (
-                      <MenuItem onClick={handleCloseContextMenu}>
+                      <MenuItem onClick={handleClickRemoveColumn}>
                         {`'${columns[contextAnchor.columnIndex].label}' 제거`}
                       </MenuItem>
                     )}

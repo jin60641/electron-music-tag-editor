@@ -32,6 +32,18 @@ const tableReducer = createReducer(initialState)
   .handleAction(tableActions.setSort, (state, action) => ({
     ...state,
     ...action.payload,
-  }));
+  }))
+  .handleAction(tableActions.removeColumn, (state, action) => {
+    const columns = [...state.columns];
+    columns.splice(action.payload, 1);
+    return {
+      ...state,
+      columns,
+    };
+  })
+  .handleAction(tableActions.setColumns, (state, action) => ({
+    ...state,
+    columns: action.payload,
+  }))
 
 export default persistReducer(persistConfig, tableReducer);
