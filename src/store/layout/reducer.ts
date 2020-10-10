@@ -3,7 +3,7 @@ import { createReducer } from 'typesafe-actions';
 import layoutActions from './actions';
 import { initialState } from './types';
 
-const alertReducer = createReducer(initialState)
+const layoutReducer = createReducer(initialState)
   .handleAction(layoutActions.makeAlert, (state, action) => ({
     ...state,
     alert: action.payload,
@@ -13,4 +13,4 @@ const alertReducer = createReducer(initialState)
     alert: { ...initialState.alert },
   }));
 
-export default alertReducer;
+export default layoutReducer;

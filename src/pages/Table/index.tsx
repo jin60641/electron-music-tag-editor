@@ -1,14 +1,11 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import { makeStyles } from '@material-ui/core/styles';
-import TableCell from '@material-ui/core/TableCell';
-import TableSortLabel from '@material-ui/core/TableSortLabel';
 import clsx from 'clsx';
-import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
-import { DraggableCore } from 'react-draggable';
-import { useDispatch, useSelector } from 'react-redux';
+import { DragDropContext, Droppable } from 'react-beautiful-dnd';
+import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import {
   AutoSizer,
   Column,
@@ -16,60 +13,52 @@ import {
   RowMouseEventHandlerParams,
   Table as RVTable,
   SortDirection,
-  TableCellProps,
-  TableHeaderProps,
   TableProps,
 } from 'react-virtualized';
 
-import actions from 'store/music/actions';
-import { Metadata } from 'store/music/types';
+import musicActions from 'store/music/actions';
+import tableActions from 'store/table/actions';
+import { DataKey } from 'store/table/types';
 import { RootState } from 'store/types';
 
 import Check from './Check';
 import Picture from './Picture';
+import TableBodyCell from './TableBodyCell';
+import TableHeaderCell from './TableHeaderCell';
 
 const useStyles = makeStyles((theme) => ({
   main: {
     minWidth: '100vw',
     height: '100vh',
   },
-  cell: {
+  headerCell: {
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
+    overflow: 'hidden',
     position: 'relative',
   },
-  handle: {
-    width: 18,
-    position: 'absolute',
-    right: 0,
-    height: '100%',
-    cursor: 'col-resize',
-  },
+  isDragging: { overflow: 'initial' },
   table: {
     fontFamily: theme.typography.fontFamily,
+    minWidth: '100vw',
     '&:focus': { outline: 'none' },
   },
   flexContainer: {
     display: 'flex',
     alignItems: 'center',
-    boxSizing: 'border-box',
   },
   tableRow: {
+    minWidth: '100vw',
     borderBottom: '1px solid rgba(224, 224, 224, 1)',
     cursor: 'pointer',
   },
-  tableCell: {
-    borderBottom: 0,
-    flex: 1,
-  },
   tableRowHover: { '&:hover': { backgroundColor: theme.palette.grey[200] } },
-  noClick: { cursor: 'initial' },
-  placeholder: {},
 }));
 
 interface ColumnItem extends Omit<ColumnProps, 'dataKey' | 'width'> {
-  dataKey: keyof Metadata | 'isSelected'
+  dataKey: DataKey,
+  disableResize?: boolean;
   width?: number;
   numeric?: boolean;
 }
@@ -83,6 +72,8 @@ const COLUMNS: ColumnItem[] = [
   {
     label: <Check />,
     dataKey: 'isSelected',
+    disableSort: true,
+    disableResize: true,
     cellDataGetter: ({ rowData, dataKey }) => (
       <Check
         cellData={rowData[dataKey]}
@@ -91,6 +82,8 @@ const COLUMNS: ColumnItem[] = [
   },
   {
     label: <Picture />,
+    disableSort: true,
+    disableResize: true,
     dataKey: 'picture',
     cellDataGetter: ({ rowData }) => (
       <Picture
@@ -141,18 +134,25 @@ const COLUMNS: ColumnItem[] = [
   },
 ];
 
-const rowHeight = 56;
-const headerHeight = 65;
-const sort = undefined;
-
-interface CellProps extends TableCellProps {}
-
-interface HeaderProps extends TableHeaderProps, Pick<TableCellProps, 'columnIndex'> {
-  isPlaceholder?: boolean,
-  dataKey: ColumnItem['dataKey'],
-}
-
-const selector = ({ music: { list } }: RootState) => list;
+const selector = ({
+  music: { list },
+  table: {
+    columnOrder,
+    columnWidth,
+    sortBy,
+    sortDirection,
+    rowHeight,
+    headerHeight,
+  },
+}: RootState) => ({
+  list,
+  columnOrder,
+  columnWidth,
+  sortBy,
+  sortDirection,
+  rowHeight,
+  headerHeight,
+});
 
 const initialContextAnchor = {
   mouseX: null,
@@ -160,37 +160,80 @@ const initialContextAnchor = {
 };
 
 const Table: React.FC = () => {
-  const [widths, setWidths] = useState({
-    isSelected: 68,
-    picture: 68,
-    title: 300,
-    album: 300,
-    artist: 180,
-    albumartist: 180,
-    genre: 150,
-    composer: 180,
-    track: 150,
-    comment: 300,
-  });
-  const width = Object.values(widths).reduce((a, b) => a + b);
+  const dispatch = useDispatch();
+  const {
+    list,
+    columnWidth,
+    columnOrder,
+    sortBy,
+    sortDirection,
+    rowHeight,
+    headerHeight,
+  } = useSelector(selector, shallowEqual);
+  const classes = useStyles();
+
+  const [isDragging, setIsDragging] = useState(false);
   const [contextAnchor, setContextAnchor] = React.useState<{
     mouseX: null | number;
     mouseY: null | number;
     columnIndex?: number;
   }>(initialContextAnchor);
+  const width = Math.max(
+    document.documentElement.clientWidth || 0,
+    window.innerWidth || 0,
+    Object.values(columnWidth).reduce((a, b) => a + b),
+  );
 
-  const dispatch = useDispatch();
-  const list = useSelector(selector);
-  const [columnOrder, setColumnOrder] = useState(Array(COLUMNS.length).fill(0).map((_, i) => i));
-  const classes = useStyles();
-  const columns = columnOrder.map((i) => ({ ...COLUMNS[i], width: widths[COLUMNS[i].dataKey] }));
+  const rows = useMemo(() => list.sort((a, b) => {
+    const lValue = a.metadata[sortBy] || '';
+    const rValue = b.metadata[sortBy] || '';
+    if (lValue === rValue) {
+      return 1;
+    }
+    return ((lValue < rValue)
+      ? 1
+      : -1
+    ) * (sortDirection === SortDirection.ASC ? -1 : 1);
+  }), [sortBy, sortDirection, list]);
 
-  const resizeColumn = ({ dataKey, deltaX }: { dataKey: ColumnItem['dataKey'], deltaX: number }) => {
-    setWidths((prevWidths) => ({
-      ...prevWidths,
-      [dataKey]: prevWidths[dataKey] + deltaX,
+  const columns = columnOrder.map((i) => ({
+    ...COLUMNS[i],
+    width: columnWidth[COLUMNS[i].dataKey],
+  }));
+
+  const handleClickRow = useCallback(({ index }: RowMouseEventHandlerParams) => {
+    dispatch(musicActions.selectMusic(index));
+  }, [dispatch]);
+
+  const getRowClassName: TableProps['rowClassName'] = ({ index }) => clsx(
+    classes.tableRow,
+    classes.flexContainer,
+    { [classes.tableRowHover]: index !== -1 && handleClickRow != null },
+  );
+
+  const handleSort = useCallback((payload) => {
+    dispatch(tableActions.setSort(payload));
+  }, [dispatch]);
+
+  const handleDragStart = useCallback(() => {
+    setIsDragging(true);
+  }, []);
+
+  const handleDragEnd = useCallback((result) => {
+    setIsDragging(false);
+    if (!result.destination) {
+      return;
+    }
+
+    dispatch(tableActions.setColumnOrder({
+      source: result.source.index,
+      destination: result.destination.index,
     }));
-  };
+  }, [dispatch]);
+
+  const handleCloseContextMenu = useCallback(() => {
+    setContextAnchor((state) => ({ ...state, ...initialContextAnchor }));
+  }, []);
 
   const handleHeaderRightClick = useCallback((
     e: React.MouseEvent<HTMLDivElement>,
@@ -204,131 +247,21 @@ const Table: React.FC = () => {
     });
   }, []);
 
-  const handleCloseContextMenu = useCallback(() => {
-    setContextAnchor((state) => ({ ...state, ...initialContextAnchor }));
-  }, []);
-
-  const handleClickRow = useCallback(({ index }: RowMouseEventHandlerParams) => {
-    dispatch(actions.selectMusic(index));
-  }, [dispatch]);
-
-  const getRowClassName: TableProps['rowClassName'] = ({ index }) => clsx(
-    classes.tableRow,
-    classes.flexContainer,
-    { [classes.tableRowHover]: index !== -1 && handleClickRow != null },
-  );
-
-  const cellRenderer = ({ cellData, columnIndex }: CellProps) => (
-    <TableCell
-      component='div'
-      className={clsx(
-        classes.tableCell,
-        classes.flexContainer,
-        { [classes.noClick]: handleClickRow == null },
-      )}
-      variant='body'
-      style={{ height: rowHeight }}
-      align={(columnIndex != null && columns[columnIndex].numeric) || false ? 'right' : 'left'}
-    >
-      {cellData}
-    </TableCell>
-  );
-
-  const headerRenderer = ({
-    label,
-    columnIndex,
-    dataKey,
-    sortBy,
-    sortDirection,
-    isPlaceholder,
-  }: HeaderProps) => {
-    const direction = {
-      [SortDirection.ASC]: 'asc',
-      [SortDirection.DESC]: 'desc',
-    };
-
-    const inner = !columns[columnIndex].disableSort && sort != null && !!sortDirection ? (
-      <TableSortLabel active={dataKey === sortBy} direction={(direction as any)[sortDirection]}>
-        {label}
-      </TableSortLabel>
-    ) : (
-      label
-    );
-
-    if (isPlaceholder) {
-      return (
-        <TableCell
-          component='div'
-          className={clsx(classes.tableCell, classes.flexContainer, classes.noClick)}
-          variant='head'
-          style={{ height: headerHeight }}
-          align={columns[columnIndex].numeric || false ? 'right' : 'left'}
-        >
-          {inner}
-        </TableCell>
-      );
-    }
-
-    return (
-      <div className={classes.cell}>
-        <Draggable
-          key={dataKey}
-          draggableId={dataKey}
-          index={columnIndex}
-        >
-          {(draggableContext) => (
-            <TableCell
-              onContextMenu={(e) => handleHeaderRightClick(e, columnIndex)}
-              component='div'
-              className={clsx(classes.tableCell, classes.flexContainer, classes.noClick)}
-              variant='head'
-              align={columns[columnIndex].numeric || false ? 'right' : 'left'}
-              innerRef={draggableContext.innerRef}
-              {...draggableContext.draggableProps}
-              {...draggableContext.dragHandleProps}
-            >
-              {inner}
-            </TableCell>
-          )}
-        </Draggable>
-        <DraggableCore
-          onDrag={(_, { deltaX }) => resizeColumn({
-            dataKey,
-            deltaX,
-          })}
-        >
-          <div className={classes.handle} />
-        </DraggableCore>
-      </div>
-    );
-  };
-
-  const handleDragEnd = useCallback((result) => {
-    if (!result.destination) {
-      return;
-    }
-
-    setColumnOrder((current) => {
-      const order = [...current];
-      const [removed] = order.splice(result.source.index, 1);
-      order.splice(result.destination.index, 0, removed);
-      return order;
-    });
-  }, []);
-
   const tableProps = {
     rowHeight,
     headerHeight,
-    sort,
+    sort: handleSort,
+    sortBy,
+    sortDirection,
     onRowClick: handleClickRow,
-    rowCount: list.length,
+    rowCount: rows.length,
   };
 
   return (
     <div className={classes.main}>
       <AutoSizer>
         {({ height }) => (
-          <DragDropContext onDragEnd={handleDragEnd}>
+          <DragDropContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
             <Droppable
               droppableId='Table'
               direction='horizontal'
@@ -338,13 +271,13 @@ const Table: React.FC = () => {
                   {...provided.draggableProps}
                   {...provided.dragHandleProps}
                   ref={provided.innerRef}
-                  className={classes.placeholder}
                 >
-                  {headerRenderer({
-                    ...columns[rubric.source.index],
-                    columnIndex: rubric.source.index,
-                    isPlaceholder: true,
-                  })}
+                  <TableHeaderCell
+                    {...columns[rubric.source.index]}
+                    columnIndex={rubric.source.index}
+                    isDragging={isDragging}
+                    isPlaceholder
+                  />
                 </div>
               )}
             >
@@ -361,9 +294,10 @@ const Table: React.FC = () => {
                     className={classes.table}
                     height={height}
                     width={width}
-                    rowGetter={({ index }) => list[index]}
+                    rowGetter={({ index }) => rows[index]}
                     {...tableProps}
                     rowClassName={getRowClassName}
+                    headerClassName={clsx(classes.headerCell, isDragging && classes.isDragging)}
                   >
                     {columns.map(({
                       className,
@@ -372,13 +306,22 @@ const Table: React.FC = () => {
                     }, index: number) => (
                       <Column
                         key={`Column-${dataKey}`}
-                        headerRenderer={(headerProps) => headerRenderer({
-                          ...headerProps,
-                          dataKey,
-                          columnIndex: index,
-                        })}
+                        headerRenderer={(headerProps) => (
+                          <TableHeaderCell
+                            {...headerProps}
+                            {...columns[index]}
+                            columnIndex={index}
+                            isDragging={isDragging}
+                            onRightClick={handleHeaderRightClick}
+                          />
+                        )}
                         className={clsx(classes.flexContainer, className)}
-                        cellRenderer={(cellProps) => cellRenderer({ ...cellProps })}
+                        cellRenderer={(props) => (
+                          <TableBodyCell
+                            {...props}
+                            {...columns[props.columnIndex]}
+                          />
+                        )}
                         dataKey={dataKey}
                         {...other}
                       />
@@ -400,7 +343,6 @@ const Table: React.FC = () => {
                         {`'${columns[contextAnchor.columnIndex].label}' 제거`}
                       </MenuItem>
                     )}
-                    <MenuItem onClick={handleCloseContextMenu}>정렬</MenuItem>
                     <MenuItem onClick={handleCloseContextMenu}>검색</MenuItem>
                     <MenuItem onClick={handleCloseContextMenu}>복사</MenuItem>
                   </Menu>

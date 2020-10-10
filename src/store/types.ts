@@ -8,18 +8,22 @@ import localeActions from './locale/actions';
 import { LocaleState } from './locale/types';
 import musicActions from './music/actions';
 import { MusicState } from './music/types';
+import tableActions from './table/actions';
+import { TableState } from './table/types';
 
 export interface RootState {
   layout: LayoutState,
   isFetching: IsFetchingState,
   locale: LocaleState,
   music: MusicState,
+  table: TableState,
 }
 
 export type RootAction =
   ActionType<typeof layoutActions> |
   ActionType<typeof musicActions> |
-  ActionType<typeof localeActions>;
+  ActionType<typeof localeActions> |
+  ActionType<typeof tableActions>;
 
 export type Epic = RxEpic<
 RootAction,
