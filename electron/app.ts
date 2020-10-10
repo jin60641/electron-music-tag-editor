@@ -1,23 +1,21 @@
 import {
   app,
+  BrowserWindow,
   dialog,
-  shell,
+  ipcMain,
   Menu,
   MenuItemConstructorOptions,
-  webFrame,
-  BrowserWindow,
-  globalShortcut,
-  ipcMain,
+  shell,
 } from 'electron';
-import * as glob from 'glob';
 import * as isDev from 'electron-is-dev';
-import * as path from 'path';
 import * as fs from 'fs';
-import * as NodeID3 from 'node-id3'
+import * as glob from 'glob';
+import * as NodeID3 from 'node-id3';
+import * as path from 'path';
 
 const close = () => null;
 
-const isMac = process.platform === 'darwin'
+const isMac = process.platform === 'darwin';
 
 app.on('window-all-closed', () => {
   close();
@@ -33,26 +31,25 @@ const createWindow = () => {
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: true,
-      preload: __dirname + '/preload.js',
-    }
+      preload: `${__dirname}/preload.js`,
+    },
   });
 
   const showOpenFile = () => {
-  	dialog.showOpenDialog(win, {
+    dialog.showOpenDialog(win, {
       properties: ['openFile', 'multiSelections'],
       filters: [{ name: 'Musics', extensions: ['mp3'] }], // TODO: support more music formats (ex. wav, flac, m4p, m4a)
     }).then(({ filePaths }) => {
       if (filePaths) {
         win.webContents.send('RESET_MUSIC');
       }
-      filePaths.forEach(filePath => {
+      filePaths.forEach((filePath) => {
         fs.readFile(filePath, (err, buffer) => {
           if (!err) {
             win.webContents.send('ADD_MUSIC', ({
               path: filePath,
               buffer,
             }));
-          } else {
           }
         });
       });
@@ -64,7 +61,7 @@ const createWindow = () => {
       properties: ['openFile', 'multiSelections'],
       filters: [{ name: 'Musics', extensions: ['mp3'] }], // TODO: support more music formats (ex. wav, flac, m4p, m4a)
     }).then(({ filePaths }) => {
-      filePaths.forEach(filePath => {
+      filePaths.forEach((filePath) => {
         fs.readFile(filePath, (err, buffer) => {
           if (!err) {
             win.webContents.send('ADD_MUSIC', ({
@@ -78,14 +75,12 @@ const createWindow = () => {
   };
 
   const showOpenDirectory = () => {
-    dialog.showOpenDialog(win, {
-      properties: ['openDirectory', 'multiSelections'],
-    }).then(({ filePaths }) => {
+    dialog.showOpenDialog(win, { properties: ['openDirectory', 'multiSelections'] }).then(({ filePaths }) => {
       if (filePaths) {
         win.webContents.send('RESET_MUSIC');
       }
-      filePaths.forEach(dirPath => {
-        glob.sync(path.join(dirPath, '**/*.mp3')).forEach(filePath => { // TODO: support more music formats (ex. wav, flac, m4p, m4a)
+      filePaths.forEach((dirPath) => {
+        glob.sync(path.join(dirPath, '**/*.mp3')).forEach((filePath) => { // TODO: support more music formats (ex. wav, flac, m4p, m4a)
           fs.readFile(filePath, (err, buffer) => {
             if (!err) {
               win.webContents.send('ADD_MUSIC', ({
@@ -93,21 +88,19 @@ const createWindow = () => {
                 buffer,
               }));
             }
-          })
+          });
         });
       });
     });
   };
 
   const showAddDirectory = () => {
-    dialog.showOpenDialog(win, {
-      properties: ['openDirectory', 'multiSelections'],
-    }).then(({ filePaths }) => {
+    dialog.showOpenDialog(win, { properties: ['openDirectory', 'multiSelections'] }).then(({ filePaths }) => {
       if (filePaths) {
         win.webContents.send('RESET_MUSIC');
       }
-      filePaths.forEach(dirPath => {
-        glob.sync(path.join(dirPath, '**/*.mp3')).forEach(filePath => { // TODO: support more music formats (ex. wav, flac, m4p, m4a)
+      filePaths.forEach((dirPath) => {
+        glob.sync(path.join(dirPath, '**/*.mp3')).forEach((filePath) => { // TODO: support more music formats (ex. wav, flac, m4p, m4a)
           fs.readFile(filePath, (err, buffer) => {
             if (!err) {
               win.webContents.send('ADD_MUSIC', ({
@@ -115,7 +108,7 @@ const createWindow = () => {
                 buffer,
               }));
             }
-          })
+          });
         });
       });
     });
@@ -183,15 +176,15 @@ const createWindow = () => {
             label: 'Speech',
             submenu: [
               { role: 'startspeaking' },
-              { role: 'stopspeaking' }
-            ]
-          }
+              { role: 'stopspeaking' },
+            ],
+          },
         ] : [
           { role: 'delete' },
           { type: 'separator' },
-          { role: 'selectAll' }
-        ])
-      ]
+          { role: 'selectAll' },
+        ]),
+      ],
     },
     // { role: 'viewMenu' }
     {
@@ -205,8 +198,8 @@ const createWindow = () => {
         { role: 'zoomin' },
         { role: 'zoomout' },
         { type: 'separator' },
-        { role: 'togglefullscreen' }
-      ]
+        { role: 'togglefullscreen' },
+      ],
     },
     // { role: 'windowMenu' }
     {
@@ -218,11 +211,11 @@ const createWindow = () => {
           { type: 'separator' },
           { role: 'front' },
           { type: 'separator' },
-          { role: 'window' }
+          { role: 'window' },
         ] : [
-          { role: 'close' }
-        ])
-      ]
+          { role: 'close' },
+        ]),
+      ],
     },
     {
       role: 'help',
@@ -231,16 +224,16 @@ const createWindow = () => {
           label: 'Learn More',
           click: async () => {
             await shell.openExternal('https://github.com/jin60641/eletron-music-tag-editor');
-          }
-        }
-      ]
-    }
-  ]
-  
-  const menu = Menu.buildFromTemplate(template as MenuItemConstructorOptions[]);
-  Menu.setApplicationMenu(menu)
+          },
+        },
+      ],
+    },
+  ];
 
-  ipcMain.on('OPEN_MUSIC', (event, dirPaths) => {
+  const menu = Menu.buildFromTemplate(template as MenuItemConstructorOptions[]);
+  Menu.setApplicationMenu(menu);
+
+  ipcMain.on('OPEN_MUSIC', (_event, dirPaths: string[]) => {
     dirPaths.forEach((dirPath) => {
       if (fs.lstatSync(dirPath).isDirectory()) {
         glob.sync(path.join(dirPath, '**/*.mp3')).forEach((filePath) => {
@@ -248,7 +241,7 @@ const createWindow = () => {
             if (!err) {
               win.webContents.send('ADD_MUSIC', ({
                 path: filePath,
-                buffer: buffer
+                buffer,
               }));
             }
           });
@@ -258,7 +251,7 @@ const createWindow = () => {
           if (!err) {
             win.webContents.send('ADD_MUSIC', ({
               path: dirPath,
-              buffer: buffer
+              buffer,
             }));
           }
         });
@@ -266,7 +259,7 @@ const createWindow = () => {
     });
   });
 
-  ipcMain.on('ADD_MUSIC', (event, filePath) => {
+  ipcMain.on('ADD_MUSIC', (_event, filePath) => {
     fs.readFile(filePath, (err, buffer) => {
       if (!err) {
         win.webContents.send('ADD_MUSIC', ({
@@ -277,7 +270,7 @@ const createWindow = () => {
     });
   });
 
-  ipcMain.on('SAVE_MUSIC', (event, {
+  ipcMain.on('SAVE_MUSIC', (_event, {
     filePaths,
     metadata: {
       albumartist: TPE2,
@@ -287,13 +280,13 @@ const createWindow = () => {
   }) => {
     const tags = { ...metadata };
     if (TPE2 !== undefined) {
-      tags.TPE2 = TPE2
+      tags.TPE2 = TPE2;
     }
     if (picture !== undefined) {
       const [APIC] = picture;
       tags.APIC = APIC;
     }
-    filePaths.forEach((filePath) => {
+    filePaths.forEach((filePath: string) => {
       NodeID3.update(tags, filePath, (err) => {
         if (!err) {
           fs.readFile(filePath, (err2, buffer) => {
@@ -304,12 +297,10 @@ const createWindow = () => {
               }));
             }
           });
-        } else {
-          console.log(err);
         }
       });
     });
   });
-}
+};
 
 app.whenReady().then(createWindow);

@@ -10,6 +10,7 @@
 
 # production
 /build
+public/electron.js
 
 # misc
 .DS_Store
@@ -28,3 +29,4 @@ yarn-error.log*
 # editor
 *.swp
 electron-builder.yml
+
