@@ -51,7 +51,7 @@ export interface Metadata extends Pick<IAudioMetadata['common'],
   composer: string,
   track: string,
   comment: string,
-  picture: string[],
+  picture?: string[],
 }
 
 export interface SaveMusicRequestPayload {

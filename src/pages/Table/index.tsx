@@ -89,7 +89,6 @@ const COLUMNS: Columns = {
   },
   picture: {
     label: <Picture />,
-    disableSort: true,
     disableResize: true,
     dataKey: 'picture',
     cellDataGetter: ({ rowData }) => (

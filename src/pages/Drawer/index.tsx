@@ -164,7 +164,7 @@ const Drawer: React.FC = () => {
       const nextValues = Object.entries(nextOptions).reduce((obj, [key, v]) => ({
         ...obj,
         [key as FieldKeys]: v.length === 1 ? v[0] : defaultOption,
-      }), {} as typeof values);
+      }), {} as Values);
       setValues(nextValues);
     }
   }, [ids, list]);

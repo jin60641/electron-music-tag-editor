@@ -1,13 +1,26 @@
-import { persistReducer } from 'redux-persist';
-import storage from 'redux-persist/lib/storage';
+import { createTransform, persistReducer } from 'redux-persist';
 import { createReducer } from 'typesafe-actions';
 
 import musicActions from './actions';
 import { initialState, MusicState } from './types';
 
+const transform = createTransform((state: MusicState['list'], key) => (key === 'list' ? state.map(({
+  metadata: {
+    picture,
+    ...metadata
+  },
+  url,
+  ...item
+}) => ({
+  ...item,
+  url: '',
+  metadata,
+})) : state));
+
 const persistConfig = {
   key: 'music',
-  storage,
+  storage: window.bridge.storage,
+  transforms: [transform],
 };
 
 const musicReducer = createReducer<MusicState>(initialState)

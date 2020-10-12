@@ -1,5 +1,4 @@
 import { persistReducer } from 'redux-persist';
-import storage from 'redux-persist/lib/storage';
 import { createReducer } from 'typesafe-actions';
 
 import tableActions from './actions';
@@ -7,7 +6,7 @@ import { initialState } from './types';
 
 const persistConfig = {
   key: 'table',
-  storage,
+  storage: window.bridge.storage,
 };
 
 const tableReducer = createReducer(initialState)

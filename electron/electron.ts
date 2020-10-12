@@ -31,6 +31,7 @@ const createWindow = () => {
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: true,
+      enableRemoteModule: true,
       preload: `${__dirname}/preload.js`,
     },
   });
@@ -40,7 +41,7 @@ const createWindow = () => {
       properties: ['openFile', 'multiSelections'],
       filters: [{ name: 'Musics', extensions: ['mp3'] }], // TODO: support more music formats (ex. wav, flac, m4p, m4a)
     }).then(({ filePaths }) => {
-      if (filePaths) {
+      if (filePaths.length) {
         win.webContents.send('RESET_MUSIC');
       }
       filePaths.forEach((filePath) => {
@@ -76,7 +77,7 @@ const createWindow = () => {
 
   const showOpenDirectory = () => {
     dialog.showOpenDialog(win, { properties: ['openDirectory', 'multiSelections'] }).then(({ filePaths }) => {
-      if (filePaths) {
+      if (filePaths.length) {
         win.webContents.send('RESET_MUSIC');
       }
       filePaths.forEach((dirPath) => {
@@ -96,9 +97,6 @@ const createWindow = () => {
 
   const showAddDirectory = () => {
     dialog.showOpenDialog(win, { properties: ['openDirectory', 'multiSelections'] }).then(({ filePaths }) => {
-      if (filePaths) {
-        win.webContents.send('RESET_MUSIC');
-      }
       filePaths.forEach((dirPath) => {
         glob.sync(path.join(dirPath, '**/*.mp3')).forEach((filePath) => { // TODO: support more music formats (ex. wav, flac, m4p, m4a)
           fs.readFile(filePath, (err, buffer) => {
@@ -284,7 +282,11 @@ const createWindow = () => {
     }
     if (picture !== undefined) {
       const [APIC] = picture;
-      tags.APIC = APIC;
+      if (Array.isArray(APIC)) {
+        tags.APIC = Buffer.from(APIC);
+      } else {
+        tags.APIC = APIC;
+      }
     }
     filePaths.forEach((filePath: string) => {
       NodeID3.update(tags, filePath, (err) => {

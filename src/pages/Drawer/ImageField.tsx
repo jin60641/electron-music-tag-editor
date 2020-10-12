@@ -11,12 +11,14 @@ import MenuItem from '@material-ui/core/MenuItem';
 import { makeStyles } from '@material-ui/core/styles';
 
 import { Music } from 'store/music/types';
+import { readFileSync } from 'utils/music';
 
 interface Props {
   list: Music[],
   ids: string,
   setValue: (value?: string) => void,
 }
+
 const useStyles = makeStyles((theme) => ({
   wrap: {
     display: 'flex',
@@ -86,7 +88,7 @@ const ImageInput: FC<Props> = ({
   const [size, setSize] = useState({ ...initialSize });
   const classes = useStyles();
 
-  const handleChangeUrl = useCallback(async (url?: string, file?: File) => {
+  const handleChangeUrl = useCallback(async (url?: string, file?: File, buffer?: Uint8Array) => {
     if (!url) {
       setImgUrl(url);
       setSize({ ...initialSize });
@@ -100,6 +102,8 @@ const ImageInput: FC<Props> = ({
     setSize(nextSize);
     if (file) {
       setValue((file as any).path);
+    } else if (buffer) {
+      setValue(buffer as any);
     } else {
       setValue(undefined);
     }
@@ -125,13 +129,8 @@ const ImageInput: FC<Props> = ({
     if (!ids || list.length !== 1) {
       return undefined;
     }
-    return list[0].metadata.picture[0];
+    return list[0].metadata.picture?.[0];
   }, [list, ids]);
-
-  useEffect(() => {
-    setImgUrl(n => n === defaultValue ? n : undefined);
-    handleChangeUrl(defaultValue);
-  }, [defaultValue, handleChangeUrl]);
 
   const handlePictureRightClick = (e: React.MouseEvent<HTMLLabelElement>) => {
     e.preventDefault();
@@ -152,12 +151,26 @@ const ImageInput: FC<Props> = ({
   }, [handleClose, setValue, handleChangeUrl]);
 
   const handleCopy = useCallback(() => {
+    if (imgUrl) {
+      window.bridge.copyImage(imgUrl);
+    }
     handleClose();
-  }, [handleClose]);
+  }, [handleClose, imgUrl]);
 
-  const handlePaste = useCallback(() => {
+  const handlePaste = useCallback(async () => {
+    const buffer = window.bridge.pasteImage();
+    if (buffer?.length) {
+      const blob = new Blob([buffer], { type: 'image/png' });
+      const url = await readFileSync(blob);
+      handleChangeUrl(url, undefined, buffer);
+    }
     handleClose();
-  }, [handleClose]);
+  }, [handleClose, handleChangeUrl]);
+
+  useEffect(() => {
+    setImgUrl((n) => (n === defaultValue ? n : undefined));
+    handleChangeUrl(defaultValue);
+  }, [defaultValue, handleChangeUrl]);
 
   return (
     <>
@@ -200,9 +213,21 @@ const ImageInput: FC<Props> = ({
             : undefined
         }
       >
-        <MenuItem onClick={handleCopy}>복사</MenuItem>
+        {!!imgUrl && <MenuItem onClick={handleCopy}>복사</MenuItem>}
         <MenuItem onClick={handlePaste}>붙여넣기</MenuItem>
-        <MenuItem onClick={handleDelete}>제거</MenuItem>
+        {!!imgUrl && (
+          <MenuItem
+            component='a'
+            href={imgUrl}
+            onClick={handleClose}
+            download
+          >
+            다운로드
+          </MenuItem>
+        )}
+        {!!imgUrl && (
+          <MenuItem onClick={handleDelete}>제거</MenuItem>
+        )}
       </Menu>
     </>
   );

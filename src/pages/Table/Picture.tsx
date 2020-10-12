@@ -7,6 +7,8 @@ import { getType } from 'typesafe-actions';
 
 import actions from 'store/music/actions';
 
+const fallbackImg = require('assets/album-cover.png');
+
 const useStyles = makeStyles((theme) => ({
   root: {
     width: 36,
@@ -28,17 +30,18 @@ interface Props {
 }
 
 const Picture: React.FC<Props> = ({ rowData }) => {
-  const src = useMemo(() => rowData?.metadata?.picture[0], [rowData]);
+  const picture = useMemo(() => rowData?.metadata?.picture, [rowData]);
+  const src = useMemo(() => picture?.[0], [picture]);
   const [validUrl, setValidUrl] = useState<string | null>(null);
   const classes = useStyles();
 
   const onError = useCallback(() => {
-    if (src) {
-      window.bridge.ipc.send(getType(actions.addMusic.request), rowData?.path);
+    if ((src || picture === undefined) && rowData?.path) {
+      window.bridge.ipc.send(getType(actions.addMusic.request), rowData.path);
     }
-  }, [rowData, src]);
+  }, [rowData, picture, src]);
 
-  const url = useMemo(() => validUrl || '/images/album-cover.png', [validUrl]);
+  const url = useMemo(() => validUrl || fallbackImg, [validUrl]);
 
   useEffect(() => {
     if (src) {
@@ -55,6 +58,12 @@ const Picture: React.FC<Props> = ({ rowData }) => {
       setValidUrl(null);
     }
   }, [src, url, onError]);
+
+  useEffect(() => {
+    if (picture === undefined) {
+      onError();
+    }
+  }, [picture, onError]);
 
   return (
     <div

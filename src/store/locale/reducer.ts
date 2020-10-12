@@ -1,5 +1,4 @@
 import { persistReducer } from 'redux-persist';
-import storage from 'redux-persist/lib/storage';
 import { createReducer } from 'typesafe-actions';
 
 import localeActions from './actions';
@@ -7,7 +6,7 @@ import { initialState, LocaleState } from './types';
 
 const persistConfig = {
   key: 'locale',
-  storage,
+  storage: window.bridge.storage,
 };
 
 const localeReducer = createReducer<LocaleState>(initialState)
