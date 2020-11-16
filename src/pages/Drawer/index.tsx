@@ -13,17 +13,16 @@ import Typography from '@material-ui/core/Typography';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import clsx from 'clsx';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector, shallowEqual } from 'react-redux';
 
-import actions from 'store/music/actions';
-import { Music } from 'store/music/types';
+import layoutActions from 'store/layout/actions';
+import { drawerWidth } from 'store/layout/types';
+import musicActions from 'store/music/actions';
 import { RootState } from 'store/types';
 
 import ImageField from './ImageField';
 import TextField from './TextField';
 import { FieldKeys, Option } from './types';
-
-const drawerWidth = 400;
 
 const useStyles = makeStyles((theme) => ({
   drawer: {
@@ -59,7 +58,17 @@ const useStyles = makeStyles((theme) => ({
   drawerShift: { width: drawerWidth },
 }));
 
-const selector = ({ music: { list } }: RootState) => list.filter(({ isSelected }) => isSelected);
+const selector = ({
+  music: {
+    list,
+  },
+  layout: {
+    drawer: isOpen,
+  },
+}: RootState) => ({
+  list: list.filter(({ isSelected }) => isSelected),
+  isOpen,
+});
 
 const FIELDS: { key: FieldKeys, label: string }[] = [{
   key: 'title',
@@ -108,7 +117,7 @@ const initialValues: Values = {
   track: defaultOption,
 };
 
-const initialOptions = {
+const initialOptions: Options = {
   title: [],
   artist: [],
   album: [],
@@ -119,30 +128,23 @@ const initialOptions = {
   track: [],
 };
 
-const uniqueList = (key: FieldKeys, list: Music[]) => list
-  .reduce((arr, { metadata: { [key]: data } }) => ((data && !arr.find((item) => item.value === `${data}`))
-    ? arr.concat({ value: data, label: `${data}` })
-    : arr
-  ), [] as Option[]);
-
 const Drawer: React.FC = () => {
   const dispatch = useDispatch();
+  const { list, isOpen } = useSelector(selector, shallowEqual);
   const [values, setValues] = useState<Values>(initialValues);
   const [options, setOptions] = useState<Options>(initialOptions);
   const [picture, setPicture] = useState<string | undefined>(undefined);
   const classes = useStyles();
   const theme = useTheme();
-  const list = useSelector(selector);
   const ids = useMemo(() => list.map(({ path }) => path).join(','), [list]);
-  const [open, setOpen] = useState(true);
 
   const handleDrawerOpen = useCallback(() => {
-    setOpen(true);
-  }, []);
+    dispatch(layoutActions.setDrawer(true));
+  }, [dispatch]);
 
   const handleDrawerClose = useCallback(() => {
-    setOpen(false);
-  }, []);
+    dispatch(layoutActions.setDrawer(false));
+  }, [dispatch]);
 
   const handleChangeText = useCallback((
     name: FieldKeys,
@@ -156,26 +158,29 @@ const Drawer: React.FC = () => {
 
   useEffect(() => {
     if (ids) {
-      const nextOptions = Object.keys(initialOptions).reduce((obj, key) => ({
-        ...obj,
-        [key as FieldKeys]: uniqueList(key as FieldKeys, list),
-      }), {} as Options);
+      let nextOptions: Options = {} as Options;
+      let nextValues: Values = {} as Values;
+      Object.keys(initialOptions).forEach((key) => {
+        const nextOption = list
+          .reduce((arr, { metadata: { [key as FieldKeys]: data } }) => ((!arr.find((item) => item.value === `${data}`))
+            ? arr.concat({ value: data, label: `${data}` })
+            : arr
+          ), [] as Option[]);
+        nextValues[key as FieldKeys] = nextOption.length === 1 && nextOption[0].value ? nextOption[0] : defaultOption;
+        nextOptions[key as FieldKeys] = nextOption.filter(({ value }) => !!value);
+      });
       setOptions(nextOptions);
-      const nextValues = Object.entries(nextOptions).reduce((obj, [key, v]) => ({
-        ...obj,
-        [key as FieldKeys]: v.length === 1 ? v[0] : defaultOption,
-      }), {} as Values);
       setValues(nextValues);
     }
   }, [ids, list]);
 
   useEffect(() => {
-    if (list.length >= 1) {
+    if (!!ids.length) {
       handleDrawerOpen();
     } else {
       handleDrawerClose();
     }
-  }, [handleDrawerClose, handleDrawerOpen, list.length]);
+  }, [handleDrawerClose, handleDrawerOpen, ids]);
 
   const handleClickSave = useCallback(() => {
     const filePaths = list.map(({ path }) => path);
@@ -184,7 +189,7 @@ const Drawer: React.FC = () => {
         ...obj,
         [key]: option.value,
       }) : obj), picture === undefined ? {} : { picture: picture.length ? [picture] : [] });
-    dispatch(actions.saveMusic.request({
+    dispatch(musicActions.saveMusic.request({
       filePaths,
       metadata,
     }));
@@ -192,10 +197,10 @@ const Drawer: React.FC = () => {
 
   return (
     <MuiDrawer
-      className={clsx(classes.drawer, open && classes.drawerShift)}
+      className={clsx(classes.drawer, isOpen && classes.drawerShift)}
       variant='persistent'
       anchor='left'
-      open={open}
+      open={isOpen}
       classes={{ paper: classes.drawerPaper }}
     >
       <div className={classes.drawerHeader}>

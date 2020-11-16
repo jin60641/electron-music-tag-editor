@@ -26,17 +26,61 @@ const persistConfig = {
 const musicReducer = createReducer<MusicState>(initialState)
   .handleAction(musicActions.resetMusic, (state) => ({
     ...state,
+    count: 0,
     list: [],
+  }))
+  .handleAction(musicActions.setCount, (state, action) => ({
+    ...state,
+    count: state.count + action.payload,
+    lastCount: state.list.length,
   }))
   .handleAction(musicActions.selectMusic, (state, action) => ({
     ...state,
+    lastSelected: action.payload,
     list: state.list.map((music, i) => ({
       ...music,
       isSelected: i === action.payload,
     })),
   }))
+  .handleAction(musicActions.selectMusicMulti, (state, action) => ({
+    ...state,
+    lastSelected: action.payload,
+    list: state.list.map((music, i) => {
+      if (state.lastSelected === undefined || state.lastSelected === i) {
+        return {
+          ...music,
+          isSelected: i === action.payload ? !music.isSelected : music.isSelected
+        }
+      }
+
+      if (
+        state.lastSelected < action.payload
+        && i > state.lastSelected
+        && i <= action.payload
+      ) {
+        return {
+          ...music,
+          isSelected: !state.list[action.payload].isSelected,
+        }
+      }
+      
+      if (
+        state.lastSelected > action.payload
+        && i < state.lastSelected
+        && i >= action.payload
+      ) {
+        return {
+          ...music,
+          isSelected: !state.list[action.payload].isSelected,
+        }
+      }
+
+      return music;
+    }),
+  }))
   .handleAction(musicActions.selectMusicAdd, (state, action) => ({
     ...state,
+    lastSelected: action.payload,
     list: state.list.map((music, i) => ({
       ...music,
       isSelected: i === action.payload ? !music.isSelected : music.isSelected,
@@ -58,6 +102,7 @@ const musicReducer = createReducer<MusicState>(initialState)
       return {
         ...state,
         list,
+        count: state.count - 1,
       };
     }
     return {

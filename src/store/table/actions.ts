@@ -14,6 +14,7 @@ const setColumnOrder = createAction(Actions.SET_COLUMN_ORDER)<SetColumnOrderPayl
 const setSort = createAction(Actions.SET_SORT)<SetSortPayload>();
 const setColumns = createAction(Actions.SET_COLUMNS)<SetColumnsPayload>();
 const removeColumn = createAction(Actions.REMOVE_COLUMN)<RemoveColumnPayload>();
+const setSearch = createAction(Actions.SET_SEARCH)<string>();
 
 export default {
   setColumnWidth,
@@ -21,4 +22,5 @@ export default {
   setSort,
   setColumns,
   removeColumn,
+  setSearch,
 };

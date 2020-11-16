@@ -17,11 +17,14 @@ import {
 } from 'react-virtualized';
 import { getType } from 'typesafe-actions';
 
+import { drawerWidth } from 'store/layout/types';
 import musicActions from 'store/music/actions';
 import tableActions from 'store/table/actions';
 import { DataKey } from 'store/table/types';
 import { RootState } from 'store/types';
 
+import Loading from 'components/Loading';
+import Search from 'components/Search';
 import Check from './Check';
 import Picture from './Picture';
 import TableBodyCell from './TableBodyCell';
@@ -40,8 +43,10 @@ type Columns = {
 
 const useStyles = makeStyles((theme) => ({
   main: {
-    minWidth: '100vw',
+    display: 'flex',
+    flexGrow: 1,
     height: '100vh',
+    overflowX: 'auto',
   },
   isFileDragging: {},
   headerCell: {
@@ -50,6 +55,22 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
     overflow: 'hidden',
     position: 'relative',
+  },
+  drag: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100vh',
+    border: '10px solid black',
+    display: 'none',
+  },
+  dragShift: {
+    left: drawerWidth,
+    width: 'calc(100% - drawerWidth)',
+  },
+  dragging: {
+    display: 'block',
   },
   isHeaderDragging: { overflow: 'initial' },
   table: {
@@ -202,11 +223,14 @@ const Table: React.FC = () => {
     ) * (sortDirection === SortDirection.ASC ? -1 : 1);
   }), [sortBy, sortDirection, list]);
 
-  const handleClickRow = useCallback(({ index, event }: RowMouseEventHandlerParams) => {
-    if (event.ctrlKey || event.metaKey) {
+  const handleClickRow = useCallback(({ index, event: e }: RowMouseEventHandlerParams) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.ctrlKey || e.metaKey) {
       dispatch(musicActions.selectMusicAdd(index));
-    } else if (event.shiftKey) {
-      // TODO: multiple selection
+    } else if (e.shiftKey) {
+      dispatch(musicActions.selectMusicMulti(index));
+      document.getSelection()?.removeAllRanges();
     } else {
       dispatch(musicActions.selectMusic(index));
     }
@@ -296,110 +320,121 @@ const Table: React.FC = () => {
   }, []);
 
   return (
-    <div
-      onDragEnter={handleDragEnter}
-      onDragLeave={handleDragLeave}
-      onDragOver={handleDragOver}
-      onDrop={handleDrop}
-      className={clsx(classes.main, isFileDragging && classes.isFileDragging)}
-    >
-      <AutoSizer>
-        {({ height }) => (
-          <DragDropContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-            <Droppable
-              droppableId='Table'
-              direction='horizontal'
-              mode='virtual'
-              renderClone={(provided, _snapshot, rubric) => (
-                <div
-                  {...provided.draggableProps}
-                  {...provided.dragHandleProps}
-                  ref={provided.innerRef}
-                >
-                  <TableHeaderCell
-                    {...columns[rubric.source.index]}
-                    columnIndex={rubric.source.index}
-                    isDragging={isHeaderDragging}
-                    isPlaceholder
-                  />
-                </div>
-              )}
-            >
-              {(droppableContext) => (
-                <div
-                  {...droppableContext.droppableProps}
-                  ref={droppableContext.innerRef}
-                  style={{
-                    width,
-                    height,
-                  }}
-                >
-                  <RVTable
-                    className={classes.table}
-                    height={height}
-                    width={width}
-                    rowGetter={({ index }) => rows[index]}
-                    {...tableProps}
-                    rowClassName={getRowClassName}
-                    headerClassName={clsx(
-                      classes.headerCell,
-                      isHeaderDragging && classes.isHeaderDragging,
-                    )}
+    <>
+      <Loading />
+      <div
+        onDragEnter={handleDragEnter}
+        className={clsx(classes.main, isFileDragging && classes.isFileDragging)}
+      >
+        <AutoSizer>
+          {({ height }) => (
+            <DragDropContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+              <Droppable
+                droppableId='Table'
+                direction='horizontal'
+                mode='virtual'
+                renderClone={(provided, _snapshot, rubric) => (
+                  <div
+                    {...provided.draggableProps}
+                    {...provided.dragHandleProps}
+                    ref={provided.innerRef}
                   >
-                    {columns.map(({
-                      className,
-                      dataKey,
-                      ...other
-                    }, index: number) => (
-                      <Column
-                        key={`Column-${dataKey}`}
-                        headerRenderer={(headerProps) => (
-                          <TableHeaderCell
-                            {...headerProps}
-                            {...columns[index]}
-                            columnIndex={index}
-                            isDragging={isHeaderDragging}
-                            onRightClick={handleHeaderRightClick}
-                          />
-                        )}
-                        className={clsx(classes.flexContainer, className)}
-                        cellRenderer={(props) => (
-                          <TableBodyCell
-                            {...props}
-                            {...columns[props.columnIndex]}
-                          />
-                        )}
-                        dataKey={dataKey}
-                        {...other}
-                      />
-                    ))}
-                  </RVTable>
-                  <Menu
-                    keepMounted
-                    open={contextAnchor.mouseY !== null}
-                    onClose={handleCloseContextMenu}
-                    anchorReference='anchorPosition'
-                    anchorPosition={
-                      contextAnchor.mouseY !== null && contextAnchor.mouseX !== null
-                        ? { top: contextAnchor.mouseY, left: contextAnchor.mouseX }
-                        : undefined
-                    }
+                    <TableHeaderCell
+                      {...columns[rubric.source.index]}
+                      columnIndex={rubric.source.index}
+                      isDragging={isHeaderDragging}
+                      isPlaceholder
+                    />
+                  </div>
+                )}
+              >
+                {(droppableContext) => (
+                  <div
+                    {...droppableContext.droppableProps}
+                    ref={droppableContext.innerRef}
+                    style={{
+                      width,
+                      height,
+                    }}
                   >
-                    {contextAnchor.columnIndex && (
-                      <MenuItem onClick={handleClickRemoveColumn}>
-                        {`'${columns[contextAnchor.columnIndex].label}' 제거`}
-                      </MenuItem>
-                    )}
-                    <MenuItem onClick={handleCloseContextMenu}>검색</MenuItem>
-                    <MenuItem onClick={handleCloseContextMenu}>복사</MenuItem>
-                  </Menu>
-                </div>
-              )}
-            </Droppable>
-          </DragDropContext>
-        )}
-      </AutoSizer>
-    </div>
+                    <RVTable
+                      className={classes.table}
+                      height={height}
+                      width={width}
+                      rowGetter={({ index }) => rows[index]}
+                      {...tableProps}
+                      rowClassName={getRowClassName}
+                      headerClassName={clsx(
+                        classes.headerCell,
+                        isHeaderDragging && classes.isHeaderDragging,
+                      )}
+                    >
+                      {columns.map(({
+                        className,
+                        dataKey,
+                        ...other
+                      }, index: number) => (
+                        <Column
+                          key={`Column-${dataKey}`}
+                          headerRenderer={(headerProps) => (
+                            <TableHeaderCell
+                              {...headerProps}
+                              {...columns[index]}
+                              columnIndex={index}
+                              isDragging={isHeaderDragging}
+                              onRightClick={handleHeaderRightClick}
+                            />
+                          )}
+                          className={clsx(classes.flexContainer, className)}
+                          cellRenderer={(props) => (
+                            <TableBodyCell
+                              {...props}
+                              {...columns[props.columnIndex]}
+                            />
+                          )}
+                          dataKey={dataKey}
+                          {...other}
+                        />
+                      ))}
+                    </RVTable>
+                    <Menu
+                      keepMounted
+                      open={contextAnchor.mouseY !== null}
+                      onClose={handleCloseContextMenu}
+                      anchorReference='anchorPosition'
+                      anchorPosition={
+                        contextAnchor.mouseY !== null && contextAnchor.mouseX !== null
+                          ? { top: contextAnchor.mouseY, left: contextAnchor.mouseX }
+                          : undefined
+                      }
+                    >
+                      {contextAnchor.columnIndex && (
+                        <MenuItem onClick={handleClickRemoveColumn}>
+                          {`'${columns[contextAnchor.columnIndex].dataKey}' 제거`}
+                        </MenuItem>
+                      )}
+                      <MenuItem onClick={handleCloseContextMenu}>검색</MenuItem>
+                      <MenuItem onClick={handleCloseContextMenu}>복사</MenuItem>
+                    </Menu>
+                  </div>
+                )}
+              </Droppable>
+            </DragDropContext>
+          )}
+        </AutoSizer>
+        <div
+          onDragEnter={handleDragEnter}
+          onDragLeave={handleDragLeave}
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
+          className={clsx(
+            classes.drag,
+            isFileDragging && classes.dragging,
+          )}
+        />
+      </div>
+      <Search />
+    </>
   );
 };
 

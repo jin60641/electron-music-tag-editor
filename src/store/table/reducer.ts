@@ -10,6 +10,10 @@ const persistConfig = {
 };
 
 const tableReducer = createReducer(initialState)
+  .handleAction(tableActions.setSearch, (state, action) => ({
+    ...state,
+    search: action.payload,
+  }))
   .handleAction(tableActions.setColumnWidth, (state, action) => {
     const columns = [...state.columns];
     const idx = columns.findIndex(({ dataKey }) => dataKey === action.payload.dataKey);

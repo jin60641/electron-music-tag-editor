@@ -13,6 +13,12 @@ import * as glob from 'glob';
 import * as NodeID3 from 'node-id3';
 import * as path from 'path';
 
+import {
+  addMusic,
+  resetMusic,
+  setCount,
+} from './apis';
+
 const close = () => null;
 
 const isMac = process.platform === 'darwin';
@@ -24,6 +30,8 @@ app.on('window-all-closed', () => {
 
 app.on('before-quit', close);
 app.on('will-quit', close);
+
+
 
 const createWindow = () => {
   // Create the browser window.
@@ -42,18 +50,10 @@ const createWindow = () => {
       filters: [{ name: 'Musics', extensions: ['mp3'] }], // TODO: support more music formats (ex. wav, flac, m4p, m4a)
     }).then(({ filePaths }) => {
       if (filePaths.length) {
-        win.webContents.send('RESET_MUSIC');
+        resetMusic(win);
+        setCount(win, filePaths.length);
       }
-      filePaths.forEach((filePath) => {
-        fs.readFile(filePath, (err, buffer) => {
-          if (!err) {
-            win.webContents.send('ADD_MUSIC', ({
-              path: filePath,
-              buffer,
-            }));
-          }
-        });
-      });
+      filePaths.forEach((filePath) => addMusic(win, filePath));
     });
   };
 
@@ -62,51 +62,33 @@ const createWindow = () => {
       properties: ['openFile', 'multiSelections'],
       filters: [{ name: 'Musics', extensions: ['mp3'] }], // TODO: support more music formats (ex. wav, flac, m4p, m4a)
     }).then(({ filePaths }) => {
-      filePaths.forEach((filePath) => {
-        fs.readFile(filePath, (err, buffer) => {
-          if (!err) {
-            win.webContents.send('ADD_MUSIC', ({
-              path: filePath,
-              buffer,
-            }));
-          }
-        });
-      });
+      setCount(win, filePaths.length);
+      filePaths.forEach((filePath) => addMusic(win, filePath));
     });
   };
 
   const showOpenDirectory = () => {
-    dialog.showOpenDialog(win, { properties: ['openDirectory', 'multiSelections'] }).then(({ filePaths }) => {
-      if (filePaths.length) {
-        win.webContents.send('RESET_MUSIC');
+    dialog.showOpenDialog(win, { properties: ['openDirectory', 'multiSelections'] }).then(({ filePaths: dirPaths }) => {
+      if (dirPaths.length) {
+        resetMusic(win);
       }
-      filePaths.forEach((dirPath) => {
-        glob.sync(path.join(dirPath, '**/*.mp3')).forEach((filePath) => { // TODO: support more music formats (ex. wav, flac, m4p, m4a)
-          fs.readFile(filePath, (err, buffer) => {
-            if (!err) {
-              win.webContents.send('ADD_MUSIC', ({
-                path: filePath,
-                buffer,
-              }));
-            }
-          });
+      dirPaths.forEach((dirPath) => {
+        const filePaths = glob.sync(path.join(dirPath, '**/*.mp3')); // TODO: support more music formats (ex. wav, flac, m4p, m4a)
+        setCount(win, filePaths.length);
+        filePaths.forEach((filePath) => {
+          addMusic(win, filePath);
         });
       });
     });
   };
 
   const showAddDirectory = () => {
-    dialog.showOpenDialog(win, { properties: ['openDirectory', 'multiSelections'] }).then(({ filePaths }) => {
-      filePaths.forEach((dirPath) => {
-        glob.sync(path.join(dirPath, '**/*.mp3')).forEach((filePath) => { // TODO: support more music formats (ex. wav, flac, m4p, m4a)
-          fs.readFile(filePath, (err, buffer) => {
-            if (!err) {
-              win.webContents.send('ADD_MUSIC', ({
-                path: filePath,
-                buffer,
-              }));
-            }
-          });
+    dialog.showOpenDialog(win, { properties: ['openDirectory', 'multiSelections'] }).then(({ filePaths: dirPaths }) => {
+      dirPaths.forEach((dirPath) => {
+        const filePaths = glob.sync(path.join(dirPath, '**/*.mp3')); // TODO: support more music formats (ex. wav, flac, m4p, m4a)
+        setCount(win, filePaths.length);
+        filePaths.forEach((filePath) => {
+          addMusic(win, filePath);
         });
       });
     });
@@ -234,38 +216,15 @@ const createWindow = () => {
   ipcMain.on('OPEN_MUSIC', (_event, dirPaths: string[]) => {
     dirPaths.forEach((dirPath) => {
       if (fs.lstatSync(dirPath).isDirectory()) {
-        glob.sync(path.join(dirPath, '**/*.mp3')).forEach((filePath) => {
-          fs.readFile(filePath, (err, buffer) => {
-            if (!err) {
-              win.webContents.send('ADD_MUSIC', ({
-                path: filePath,
-                buffer,
-              }));
-            }
-          });
-        });
+        glob.sync(path.join(dirPath, '**/*.mp3')).forEach((filePath) => addMusic(win, filePath));
       } else {
-        fs.readFile(dirPath, (err, buffer) => {
-          if (!err) {
-            win.webContents.send('ADD_MUSIC', ({
-              path: dirPath,
-              buffer,
-            }));
-          }
-        });
+        addMusic(win, dirPath);
       }
     });
   });
 
   ipcMain.on('ADD_MUSIC', (_event, filePath) => {
-    fs.readFile(filePath, (err, buffer) => {
-      if (!err) {
-        win.webContents.send('ADD_MUSIC', ({
-          path: filePath,
-          buffer,
-        }));
-      }
-    });
+    addMusic(win, filePath);
   });
 
   ipcMain.on('SAVE_MUSIC', (_event, {

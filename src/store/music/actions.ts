@@ -9,8 +9,17 @@ import {
   SaveMusicSuccessPayload,
 } from './types';
 
+
+const setCount = createAction(Actions.SET_COUNT)<number>();
+
 const selectMusic = createAction(
   Actions.SELECT_MUSIC,
+)<
+number
+>();
+
+const selectMusicMulti = createAction(
+  Actions.SELECT_MUSIC_MULTI,
 )<
 number
 >();
@@ -65,4 +74,6 @@ export default {
   selectMusicAll,
   saveMusic,
   selectMusicAdd,
+  selectMusicMulti,
+  setCount,
 };

@@ -11,6 +11,8 @@ const useStyles = makeStyles(() => createStyles({
   main: {
     display: 'flex',
     flexDirection: 'row',
+    overflow: 'hidden',
+    flexGrow: 1,
   },
 }));
 

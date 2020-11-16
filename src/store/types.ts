@@ -25,6 +25,14 @@ export type RootAction =
   ActionType<typeof localeActions> |
   ActionType<typeof tableActions>;
 
+export const channels = [
+  musicActions.resetMusic,
+  musicActions.setCount,
+  musicActions.addMusic.request,
+  musicActions.addMusic.success,
+  musicActions.addMusic.failure,
+];
+
 export type Epic = RxEpic<
 RootAction,
 RootAction,

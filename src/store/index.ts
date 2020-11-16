@@ -2,11 +2,11 @@ import { applyMiddleware, compose, createStore } from 'redux';
 import { createLogger } from 'redux-logger';
 import { createEpicMiddleware } from 'redux-observable';
 import { persistStore } from 'redux-persist';
+import { getType } from 'typesafe-actions';
 
 import rootEpic from './epic';
-import { Actions as MusicActions } from './music/types';
 import rootReducer from './reducer';
-import { RootAction, RootState } from './types';
+import { RootAction, RootState, channels } from './types';
 
 const composeEnhancers = compose;
 
@@ -28,9 +28,9 @@ epicMiddleware.run(rootEpic);
 
 const persistor = persistStore(store);
 
-Object.values(MusicActions).forEach((channel) => {
-  window.bridge.ipc.receive(channel, (data) => {
-    store.dispatch({ type: channel as any, payload: data });
+channels.forEach((channel: any) => {
+  window.bridge.ipc.receive(getType(channel), (data) => {
+    store.dispatch(channel(data));
   });
 });
 

@@ -35,7 +35,7 @@ const Check: React.FC<Props> = ({ isChecked, id }) => {
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     if (isRoot) {
       dispatch(actions.selectMusicAll(e.target.checked));
-    } else if (index) {
+    } else if (index !== undefined) {
       dispatch(actions.selectMusicAdd(index));
     }
   }, [dispatch, index, isRoot]);

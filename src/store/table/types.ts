@@ -15,14 +15,16 @@ export interface TableState {
   rowHeight: number,
   sortBy: keyof Metadata,
   sortDirection: typeof SortDirection.ASC | typeof SortDirection.DESC,
+  search: string,
 }
 
 export enum Actions {
-  SET_COLUMN_WIDTH = 'SET_COLUMN_WIDTH',
-  SET_COLUMN_ORDER = 'SET_COLUMN_ORDER',
-  SET_SORT = 'SET_SORT',
-  REMOVE_COLUMN = 'REMOVE_COLUMN',
-  SET_COLUMNS = 'SET_COLUMNS' // TODO: 사용자 정의 컬럼 모달용
+  SET_COLUMN_WIDTH = 'TABLE.SET_COLUMN_WIDTH',
+  SET_COLUMN_ORDER = 'TABLE.SET_COLUMN_ORDER',
+  SET_SORT = 'TABLE.SET_SORT',
+  REMOVE_COLUMN = 'TABLE.REMOVE_COLUMN',
+  SET_SEARCH = 'TABLE.SET_SEARCH',
+  SET_COLUMNS = 'TABLE.SET_COLUMNS', // TODO: 사용자 정의 컬럼 모달용
 }
 
 export type SetSortPayload = Pick<TableState, 'sortBy' | 'sortDirection'>;
@@ -69,6 +71,7 @@ export const initialState: TableState = {
   columns: [...initialColumns],
   sortBy: 'title',
   sortDirection: SortDirection.ASC,
+  search: '',
 };
 
 export interface SetColumnWidthPayload {

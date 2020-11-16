@@ -30,16 +30,19 @@ interface Props {
 }
 
 const Picture: React.FC<Props> = ({ rowData }) => {
+  const [init, setInit] = useState(false);
+  const path = useMemo(() => rowData?.path, [rowData]);
   const picture = useMemo(() => rowData?.metadata?.picture, [rowData]);
   const src = useMemo(() => picture?.[0], [picture]);
   const [validUrl, setValidUrl] = useState<string | null>(null);
   const classes = useStyles();
 
   const onError = useCallback(() => {
-    if ((src || picture === undefined) && rowData?.path) {
-      window.bridge.ipc.send(getType(actions.addMusic.request), rowData.path);
+    if ((src || picture === undefined) && path && !init) {
+      setInit(true);
+      window.bridge.ipc.send(getType(actions.addMusic.request), path);
     }
-  }, [rowData, picture, src]);
+  }, [init, path, picture, src]);
 
   const url = useMemo(() => validUrl || fallbackImg, [validUrl]);
 

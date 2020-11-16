@@ -1,5 +1,5 @@
 export enum Actions {
-  SET_LOCALE = 'SET_LOCALE'
+  SET_LOCALE = 'LOCALE.SET_LOCALE'
 }
 
 export type LocaleState = {
