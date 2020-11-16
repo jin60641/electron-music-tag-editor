@@ -31,8 +31,6 @@ app.on('window-all-closed', () => {
 app.on('before-quit', close);
 app.on('will-quit', close);
 
-
-
 const createWindow = () => {
   // Create the browser window.
   const win = new BrowserWindow({
@@ -213,21 +211,25 @@ const createWindow = () => {
   const menu = Menu.buildFromTemplate(template as MenuItemConstructorOptions[]);
   Menu.setApplicationMenu(menu);
 
-  ipcMain.on('OPEN_MUSIC', (_event, dirPaths: string[]) => {
+  ipcMain.on('MUSIC.OPEN_MUSIC', (_event, dirPaths: string[]) => {
     dirPaths.forEach((dirPath) => {
       if (fs.lstatSync(dirPath).isDirectory()) {
-        glob.sync(path.join(dirPath, '**/*.mp3')).forEach((filePath) => addMusic(win, filePath));
+        const filePaths = glob.sync(path.join(dirPath, '**/*.mp3'));
+        setCount(win, filePaths.length);
+        filePaths.forEach((filePath) => addMusic(win, filePath));
       } else {
+        setCount(win, 1);
         addMusic(win, dirPath);
       }
     });
   });
 
-  ipcMain.on('ADD_MUSIC', (_event, filePath) => {
+  ipcMain.on('MUSIC.ADD_MUSIC', (_event, filePath) => {
+    setCount(win, 1);
     addMusic(win, filePath);
   });
 
-  ipcMain.on('SAVE_MUSIC', (_event, {
+  ipcMain.on('MUSIC.SAVE_MUSIC', (_event, {
     filePaths,
     metadata: {
       albumartist: TPE2,
@@ -252,7 +254,7 @@ const createWindow = () => {
         if (!err) {
           fs.readFile(filePath, (err2, buffer) => {
             if (!err2) {
-              win.webContents.send('SAVE_MUSIC#SUCCESS', ({
+              win.webContents.send('MUSIC.SAVE_MUSIC#SUCCESS', ({
                 path: filePath,
                 buffer,
               }));

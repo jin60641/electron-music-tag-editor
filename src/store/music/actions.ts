@@ -9,7 +9,6 @@ import {
   SaveMusicSuccessPayload,
 } from './types';
 
-
 const setCount = createAction(Actions.SET_COUNT)<number>();
 
 const selectMusic = createAction(

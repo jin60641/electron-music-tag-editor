@@ -1,5 +1,6 @@
 import React from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+
+import { useDispatch, useSelector } from 'react-redux';
 
 import { RootState } from 'store/types';
 
@@ -20,6 +21,6 @@ const Search = () => {
       {search}
     </div>
   );
-}
+};
 
 export default Search;

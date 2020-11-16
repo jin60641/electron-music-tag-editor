@@ -24,7 +24,7 @@ export enum Actions {
   SET_SORT = 'TABLE.SET_SORT',
   REMOVE_COLUMN = 'TABLE.REMOVE_COLUMN',
   SET_SEARCH = 'TABLE.SET_SEARCH',
-  SET_COLUMNS = 'TABLE.SET_COLUMNS', // TODO: 사용자 정의 컬럼 모달용
+  SET_COLUMNS = 'TABLE.SET_COLUMNS' // TODO: 사용자 정의 컬럼 모달용
 }
 
 export type SetSortPayload = Pick<TableState, 'sortBy' | 'sortDirection'>;

@@ -1,6 +1,6 @@
 declare module '*.png' {
-    const value: string;
-    export = value;
+  const value: string;
+  export = value;
 }
 
 declare global {

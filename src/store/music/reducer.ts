@@ -49,8 +49,8 @@ const musicReducer = createReducer<MusicState>(initialState)
       if (state.lastSelected === undefined || state.lastSelected === i) {
         return {
           ...music,
-          isSelected: i === action.payload ? !music.isSelected : music.isSelected
-        }
+          isSelected: i === action.payload ? !music.isSelected : music.isSelected,
+        };
       }
 
       if (
@@ -61,9 +61,9 @@ const musicReducer = createReducer<MusicState>(initialState)
         return {
           ...music,
           isSelected: !state.list[action.payload].isSelected,
-        }
+        };
       }
-      
+
       if (
         state.lastSelected > action.payload
         && i < state.lastSelected
@@ -72,7 +72,7 @@ const musicReducer = createReducer<MusicState>(initialState)
         return {
           ...music,
           isSelected: !state.list[action.payload].isSelected,
-        }
+        };
       }
 
       return music;

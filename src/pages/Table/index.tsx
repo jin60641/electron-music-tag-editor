@@ -17,14 +17,14 @@ import {
 } from 'react-virtualized';
 import { getType } from 'typesafe-actions';
 
+import Loading from 'components/Loading';
+import Search from 'components/Search';
 import { drawerWidth } from 'store/layout/types';
 import musicActions from 'store/music/actions';
 import tableActions from 'store/table/actions';
 import { DataKey } from 'store/table/types';
 import { RootState } from 'store/types';
 
-import Loading from 'components/Loading';
-import Search from 'components/Search';
 import Check from './Check';
 import Picture from './Picture';
 import TableBodyCell from './TableBodyCell';
@@ -69,9 +69,7 @@ const useStyles = makeStyles((theme) => ({
     left: drawerWidth,
     width: 'calc(100% - drawerWidth)',
   },
-  dragging: {
-    display: 'block',
-  },
+  dragging: { display: 'block' },
   isHeaderDragging: { overflow: 'initial' },
   table: {
     fontFamily: theme.typography.fontFamily,
@@ -230,7 +228,10 @@ const Table: React.FC = () => {
       dispatch(musicActions.selectMusicAdd(index));
     } else if (e.shiftKey) {
       dispatch(musicActions.selectMusicMulti(index));
-      document.getSelection()?.removeAllRanges();
+      const selection = document.getSelection();
+      if (selection) {
+        selection.removeAllRanges();
+      }
     } else {
       dispatch(musicActions.selectMusic(index));
     }

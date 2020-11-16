@@ -13,7 +13,7 @@ import Typography from '@material-ui/core/Typography';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import clsx from 'clsx';
-import { useDispatch, useSelector, shallowEqual } from 'react-redux';
+import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 
 import layoutActions from 'store/layout/actions';
 import { drawerWidth } from 'store/layout/types';
@@ -59,12 +59,8 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const selector = ({
-  music: {
-    list,
-  },
-  layout: {
-    drawer: isOpen,
-  },
+  music: { list },
+  layout: { drawer: isOpen },
 }: RootState) => ({
   list: list.filter(({ isSelected }) => isSelected),
   isOpen,
@@ -158,15 +154,17 @@ const Drawer: React.FC = () => {
 
   useEffect(() => {
     if (ids) {
-      let nextOptions: Options = {} as Options;
-      let nextValues: Values = {} as Values;
+      const nextOptions: Options = {} as Options;
+      const nextValues: Values = {} as Values;
       Object.keys(initialOptions).forEach((key) => {
         const nextOption = list
           .reduce((arr, { metadata: { [key as FieldKeys]: data } }) => ((!arr.find((item) => item.value === `${data}`))
             ? arr.concat({ value: data, label: `${data}` })
             : arr
           ), [] as Option[]);
-        nextValues[key as FieldKeys] = nextOption.length === 1 && nextOption[0].value ? nextOption[0] : defaultOption;
+        nextValues[key as FieldKeys] = nextOption.length === 1 && nextOption[0].value
+          ? nextOption[0]
+          : defaultOption;
         nextOptions[key as FieldKeys] = nextOption.filter(({ value }) => !!value);
       });
       setOptions(nextOptions);
@@ -175,7 +173,7 @@ const Drawer: React.FC = () => {
   }, [ids, list]);
 
   useEffect(() => {
-    if (!!ids.length) {
+    if (ids.length) {
       handleDrawerOpen();
     } else {
       handleDrawerClose();

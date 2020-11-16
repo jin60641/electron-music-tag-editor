@@ -9,7 +9,9 @@ import React, {
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import { makeStyles } from '@material-ui/core/styles';
+import { getType } from 'typesafe-actions';
 
+import actions from 'store/music/actions';
 import { Music } from 'store/music/types';
 import { readFileSync } from 'utils/music';
 
@@ -83,6 +85,7 @@ const ImageInput: FC<Props> = ({
   ids,
   list,
 }) => {
+  const [init, setInit] = useState(false);
   const [contextAnchor, setContextAnchor] = React.useState<ContextAnchor>(initialContextAnchor);
   const [imgUrl, setImgUrl] = useState<string | undefined>(undefined);
   const [size, setSize] = useState({ ...initialSize });
@@ -131,6 +134,19 @@ const ImageInput: FC<Props> = ({
     }
     return list[0].metadata.picture?.[0];
   }, [list, ids]);
+
+  useEffect(() => {
+    if (!init && !!ids && list.length === 1 && list[0].metadata && !list[0].metadata.picture?.[0]) {
+      window.bridge.ipc.send(getType(actions.addMusic.request), list[0].path);
+      setInit(true);
+    }
+  }, [list, ids, init]);
+
+  useEffect(() => {
+    if (ids) {
+      setInit(false);
+    }
+  }, [ids]);
 
   const handlePictureRightClick = (e: React.MouseEvent<HTMLLabelElement>) => {
     e.preventDefault();

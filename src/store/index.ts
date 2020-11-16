@@ -6,7 +6,7 @@ import { getType } from 'typesafe-actions';
 
 import rootEpic from './epic';
 import rootReducer from './reducer';
-import { RootAction, RootState, channels } from './types';
+import { channels, RootAction, RootState } from './types';
 
 const composeEnhancers = compose;
 
