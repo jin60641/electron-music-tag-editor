@@ -271,11 +271,13 @@ const Table: React.FC = () => {
     e: React.MouseEvent<HTMLDivElement>,
     columnIndex: number,
   ) => {
-    setContextAnchor({
-      mouseX: e.clientX - 2,
-      mouseY: e.clientY - 4,
-      columnIndex,
-    });
+    if (columnIndex > 0) {
+      setContextAnchor({
+        mouseX: e.clientX - 2,
+        mouseY: e.clientY - 4,
+        columnIndex,
+      });
+    }
   }, []);
 
   const handleClickRemoveColumn = useCallback(() => {
@@ -409,13 +411,11 @@ const Table: React.FC = () => {
                           : undefined
                       }
                     >
-                      {contextAnchor.columnIndex && (
+                      {!!contextAnchor.columnIndex && (
                         <MenuItem onClick={handleClickRemoveColumn}>
                           {`'${columns[contextAnchor.columnIndex].dataKey}' 제거`}
                         </MenuItem>
                       )}
-                      <MenuItem onClick={handleCloseContextMenu}>검색</MenuItem>
-                      <MenuItem onClick={handleCloseContextMenu}>복사</MenuItem>
                     </Menu>
                   </div>
                 )}
