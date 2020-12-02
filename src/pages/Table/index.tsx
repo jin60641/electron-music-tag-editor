@@ -67,7 +67,7 @@ const useStyles = makeStyles((theme) => ({
   },
   dragShift: {
     left: drawerWidth,
-    width: 'calc(100% - drawerWidth)',
+    width: `calc(100% - ${drawerWidth}px)`,
   },
   dragging: { display: 'block' },
   isHeaderDragging: { overflow: 'initial' },
@@ -167,6 +167,7 @@ const selector = ({
     rowHeight,
     headerHeight,
   },
+  layout: { drawer: isDrawerOpen },
 }: RootState) => ({
   list,
   columns: columns.map((column) => ({
@@ -177,6 +178,7 @@ const selector = ({
   sortDirection,
   rowHeight,
   headerHeight,
+  isDrawerOpen,
 });
 
 const initialContextAnchor = {
@@ -193,6 +195,7 @@ const Table: React.FC = () => {
     columns,
     rowHeight,
     headerHeight,
+    isDrawerOpen,
   } = useSelector(selector, shallowEqual);
   const classes = useStyles();
 
@@ -431,6 +434,7 @@ const Table: React.FC = () => {
           className={clsx(
             classes.drag,
             isFileDragging && classes.dragging,
+            isDrawerOpen && classes.dragShift,
           )}
         />
       </div>
