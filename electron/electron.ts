@@ -15,6 +15,7 @@ import * as path from 'path';
 
 import {
   addMusic,
+  saveMusic,
   resetMusic,
   setCount,
 } from './apis';
@@ -233,11 +234,12 @@ const createWindow = () => {
     filePaths,
     metadata: {
       albumartist: TPE2,
+      comment: COMM = '',
       picture,
       ...metadata
     },
   }) => {
-    const tags = { ...metadata };
+    const tags = { COMM, ...metadata };
     if (TPE2 !== undefined) {
       tags.TPE2 = TPE2;
     }
@@ -252,14 +254,7 @@ const createWindow = () => {
     filePaths.forEach((filePath: string) => {
       NodeID3.update(tags, filePath, (err) => {
         if (!err) {
-          fs.readFile(filePath, (err2, buffer) => {
-            if (!err2) {
-              win.webContents.send('MUSIC.SAVE_MUSIC#SUCCESS', ({
-                path: filePath,
-                buffer,
-              }));
-            }
-          });
+          saveMusic(win, filePath);
         }
       });
     });

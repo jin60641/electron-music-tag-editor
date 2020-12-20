@@ -28,7 +28,7 @@ epicMiddleware.run(rootEpic);
 
 const persistor = persistStore(store);
 
-channels.forEach((channel: any) => {
+channels.forEach((channel) => {
   window.bridge.ipc.receive(getType(channel), (data) => {
     store.dispatch(channel(data));
   });
