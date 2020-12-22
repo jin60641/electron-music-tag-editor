@@ -245,7 +245,7 @@ const createWindow = () => {
     }
     if (picture !== undefined) {
       const [APIC] = picture;
-      if (Array.isArray(APIC)) {
+      if (APIC instanceof Uint8Array) {
         tags.APIC = Buffer.from(APIC);
       } else {
         tags.APIC = APIC;

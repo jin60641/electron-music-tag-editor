@@ -2,7 +2,7 @@ import { SortDirection } from 'react-virtualized';
 
 import { Metadata } from 'store/music/types';
 
-export type DataKey = keyof Metadata | 'isSelected';
+export type DataKey = keyof Metadata | 'isSelected' | 'filename';
 
 interface Column {
   dataKey: DataKey,
@@ -62,6 +62,9 @@ const initialColumns: Column[] = [{
   width: 150,
 }, {
   dataKey: 'comment',
+  width: 300,
+}, {
+  dataKey: 'filename',
   width: 300,
 }];
 

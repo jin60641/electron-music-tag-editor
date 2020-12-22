@@ -184,8 +184,10 @@ const ImageInput: FC<Props> = ({
   }, [handleClose, handleChangeUrl]);
 
   useEffect(() => {
-    setImgUrl((n) => (n === defaultValue ? n : undefined));
-    handleChangeUrl(defaultValue);
+    if (!(defaultValue instanceof Uint8Array)) {
+      setImgUrl((n) => (n === defaultValue ? n : undefined));
+      handleChangeUrl(defaultValue);
+    }
   }, [defaultValue, handleChangeUrl]);
 
   return (

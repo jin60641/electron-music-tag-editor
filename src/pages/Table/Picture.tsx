@@ -48,7 +48,7 @@ const Picture: React.FC<Props> = ({ rowData }) => {
 
   useEffect(() => {
     if (src) {
-      if (src !== url) {
+      if (src !== url && !(src instanceof Uint8Array)) {
         setValidUrl(null);
       }
       const image = new Image();

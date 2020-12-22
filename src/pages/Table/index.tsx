@@ -156,6 +156,11 @@ const COLUMNS: Columns = {
     dataKey: 'comment',
     cellDataGetter,
   },
+  filename: {
+    label: '파일명',
+    dataKey: 'filename',
+    cellDataGetter: ({ rowData: { path } }) => path.split('/').slice(-1),
+  }
 };
 
 const selector = ({
