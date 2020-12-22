@@ -5,8 +5,8 @@ import {
   AddMusicRequestPayload,
   Music,
   OpenMusicRequestPayload,
-  SaveMusicRequestPayload,
-  SaveMusicSuccessPayload,
+  SaveMusicPayload,
+  UpdateMusicRequestPayload,
 } from './types';
 
 const setCount = createAction(Actions.SET_COUNT)<number>();
@@ -59,11 +59,19 @@ Music,
 undefined
 >();
 
-const saveMusic = createAsyncAction(
+const saveMusic = createAction(
   Actions.SAVE_MUSIC_REQUEST,
-  Actions.SAVE_MUSIC_SUCCESS,
-  Actions.SAVE_MUSIC_FAILURE,
-)<SaveMusicRequestPayload, SaveMusicSuccessPayload, undefined>();
+)<SaveMusicPayload>();
+
+const updateMusic = createAsyncAction(
+  Actions.UPDATE_MUSIC_REQUEST,
+  Actions.UPDATE_MUSIC_SUCCESS,
+  Actions.UPDATE_MUSIC_FAILURE,
+)<
+UpdateMusicRequestPayload,
+Music,
+undefined
+>();
 
 export default {
   openMusic,
@@ -72,6 +80,7 @@ export default {
   selectMusic,
   selectMusicAll,
   saveMusic,
+  updateMusic,
   selectMusicAdd,
   selectMusicMulti,
   setCount,

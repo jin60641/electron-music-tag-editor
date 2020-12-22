@@ -1,11 +1,11 @@
 import { getType } from 'typesafe-actions';
 
 import actions from './actions';
-import { SaveMusicRequestPayload } from './types';
+import { SaveMusicPayload } from './types';
 
 export const requestSaveMusic: (
-  payload: SaveMusicRequestPayload,
+  payload: SaveMusicPayload,
 ) => Promise<undefined> = async (payload) => {
-  window.bridge.ipc.send(getType(actions.saveMusic.request), payload);
+  window.bridge.ipc.send(getType(actions.saveMusic), payload);
   return undefined;
 };

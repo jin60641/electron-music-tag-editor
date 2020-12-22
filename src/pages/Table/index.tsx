@@ -48,7 +48,6 @@ const useStyles = makeStyles((theme) => ({
     height: '100vh',
     overflowX: 'auto',
   },
-  isFileDragging: {},
   headerCell: {
     display: 'flex',
     flexDirection: 'row',
@@ -160,7 +159,7 @@ const COLUMNS: Columns = {
     label: '파일명',
     dataKey: 'filename',
     cellDataGetter: ({ rowData: { path } }) => path.split('/').slice(-1),
-  }
+  },
 };
 
 const selector = ({
@@ -335,7 +334,7 @@ const Table: React.FC = () => {
       <Loading />
       <div
         onDragEnter={handleDragEnter}
-        className={clsx(classes.main, isFileDragging && classes.isFileDragging)}
+        className={classes.main}
       >
         <AutoSizer>
           {({ height }) => (

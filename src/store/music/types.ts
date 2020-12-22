@@ -24,9 +24,13 @@ export enum Actions {
   ADD_MUSIC_SUCCESS = 'MUSIC.ADD_MUSIC#SUCCESS',
   ADD_MUSIC_FAILURE = 'MUSIC.ADD_MUSIC#FAILURE',
 
+  UPDATE_MUSIC_REQUEST = 'MUSIC.UPDATE_MUSIC',
+  UPDATE_MUSIC_SUCCESS = 'MUSIC.UPDATE_MUSIC#SUCCESS',
+  UPDATE_MUSIC_FAILURE = 'MUSIC.UPDATE_MUSIC#FAILURE',
+
   SAVE_MUSIC_REQUEST = 'MUSIC.SAVE_MUSIC',
   SAVE_MUSIC_SUCCESS = 'MUSIC.SAVE_MUSIC#SUCCESS',
-  SAVE_MUSIC_FAILURE = 'MUSIC.SAVE_MUSIC#FAILURE'
+  SAVE_MUSIC_FAILURE = 'MUSIC.SAVE_MUSIC#FAILURE',
 }
 
 export const initialState: MusicState = { list: [], count: 0, lastCount: 0 };
@@ -46,6 +50,7 @@ export interface OpenMusicRequestPayload {
 }
 
 export type AddMusicRequestPayload = OpenMusicRequestPayload;
+export type UpdateMusicRequestPayload = OpenMusicRequestPayload;
 
 export interface Metadata extends Pick<IAudioMetadata['common'],
 'title' |
@@ -60,9 +65,7 @@ export interface Metadata extends Pick<IAudioMetadata['common'],
   picture?: (string | Uint8Array)[],
 }
 
-export interface SaveMusicRequestPayload {
+export interface SaveMusicPayload {
   filePaths: Music['path'][];
   metadata: Partial<Metadata>;
 }
-
-export type SaveMusicSuccessPayload = OpenMusicRequestPayload;

@@ -2,13 +2,15 @@
 exports.__esModule = true;
 exports.saveMusic = exports.addMusic = exports.setCount = exports.resetMusic = void 0;
 var fs = require("fs");
-exports.resetMusic = function (win) {
+var resetMusic = function (win) {
     win.webContents.send('MUSIC.RESET_MUSIC');
 };
-exports.setCount = function (win, count) {
+exports.resetMusic = resetMusic;
+var setCount = function (win, count) {
     win.webContents.send('MUSIC.SET_COUNT', count);
 };
-exports.addMusic = function (win, filePath) {
+exports.setCount = setCount;
+var addMusic = function (win, filePath) {
     fs.readFile(filePath, function (err, buffer) {
         if (!err) {
             win.webContents.send('MUSIC.ADD_MUSIC', ({
@@ -18,13 +20,15 @@ exports.addMusic = function (win, filePath) {
         }
     });
 };
-exports.saveMusic = function (win, filePath) {
+exports.addMusic = addMusic;
+var saveMusic = function (win, filePath) {
     fs.readFile(filePath, function (err, buffer) {
         if (!err) {
-            win.webContents.send('MUSIC.SAVE_MUSIC#SUCCESS', ({
+            win.webContents.send('MUSIC.UPDATE_MUSIC', ({
                 path: filePath,
                 buffer: buffer
             }));
         }
     });
 };
+exports.saveMusic = saveMusic;

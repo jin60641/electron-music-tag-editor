@@ -17,22 +17,18 @@ import { requestSaveMusic } from './apis';
 
 const openMusicEpic = createAsyncEpic(actions.openMusic, bufferToMusic, concatMap);
 const addMusicEpic = createAsyncEpic(actions.addMusic, bufferToMusic, concatMap);
+const updateMusicEpic = createAsyncEpic(actions.updateMusic, bufferToMusic, concatMap);
 
 const saveMusicRequestEpic: Epic = (action$) => action$.pipe(
-  filter(isActionOf(actions.saveMusic.request)),
+  filter(isActionOf(actions.saveMusic)),
   mergeMap((action) => from(requestSaveMusic(action.payload)).pipe(
     mergeMap(() => []),
   )),
 );
 
-const saveMusicSuccessEpic: Epic = (action$) => action$.pipe(
-  filter(isActionOf(actions.saveMusic.success)),
-  mergeMap((action) => [actions.addMusic.request(action.payload)]),
-);
-
 export default combineEpics(
   openMusicEpic,
   addMusicEpic,
+  updateMusicEpic,
   saveMusicRequestEpic,
-  saveMusicSuccessEpic,
 );

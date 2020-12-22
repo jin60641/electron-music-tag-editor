@@ -187,7 +187,7 @@ const Drawer: React.FC = () => {
         ...obj,
         [key]: option.value,
       }) : obj), picture === undefined ? {} : { picture: picture.length ? [picture] : [] });
-    dispatch(musicActions.saveMusic.request({
+    dispatch(musicActions.saveMusic({
       filePaths,
       metadata,
     }));

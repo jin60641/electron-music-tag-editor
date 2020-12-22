@@ -7,6 +7,7 @@ import {
   MenuItemConstructorOptions,
   shell,
 } from 'electron';
+import fetch from 'electron-fetch';
 import * as isDev from 'electron-is-dev';
 import * as fs from 'fs';
 import * as glob from 'glob';
@@ -15,8 +16,8 @@ import * as path from 'path';
 
 import {
   addMusic,
-  saveMusic,
   resetMusic,
+  saveMusic,
   setCount,
 } from './apis';
 
@@ -230,7 +231,7 @@ const createWindow = () => {
     addMusic(win, filePath);
   });
 
-  ipcMain.on('MUSIC.SAVE_MUSIC', (_event, {
+  ipcMain.on('MUSIC.SAVE_MUSIC', async (_event, {
     filePaths,
     metadata: {
       albumartist: TPE2,
@@ -247,6 +248,11 @@ const createWindow = () => {
       const [APIC] = picture;
       if (APIC instanceof Uint8Array) {
         tags.APIC = Buffer.from(APIC);
+      } else if (/https?:\/\//.test(APIC) && !fs.existsSync(APIC)) { // external img
+        const response = await fetch(APIC);
+        const arrayBuffer = await response.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        tags.APIC = buffer;
       } else {
         tags.APIC = APIC;
       }

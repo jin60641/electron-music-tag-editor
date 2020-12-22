@@ -23,7 +23,7 @@ export const addMusic = (win: BrowserWindow, filePath: string) => {
 export const saveMusic = (win: BrowserWindow, filePath: string) => {
   fs.readFile(filePath, (err, buffer) => {
     if (!err) {
-      win.webContents.send('MUSIC.SAVE_MUSIC#SUCCESS', ({
+      win.webContents.send('MUSIC.UPDATE_MUSIC', ({
         path: filePath,
         buffer,
       }));

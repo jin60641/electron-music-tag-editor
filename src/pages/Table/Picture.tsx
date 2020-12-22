@@ -7,7 +7,7 @@ import { getType } from 'typesafe-actions';
 
 import actions from 'store/music/actions';
 
-const fallbackImg = require('assets/album-cover.png');
+const fallbackImg = require('assets/album-cover.png').default;
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -47,8 +47,8 @@ const Picture: React.FC<Props> = ({ rowData }) => {
   const url = useMemo(() => validUrl || fallbackImg, [validUrl]);
 
   useEffect(() => {
-    if (src) {
-      if (src !== url && !(src instanceof Uint8Array)) {
+    if (src && !(src instanceof Uint8Array)) {
+      if (src !== url) {
         setValidUrl(null);
       }
       const image = new Image();
@@ -57,7 +57,7 @@ const Picture: React.FC<Props> = ({ rowData }) => {
       };
       image.onerror = onError;
       image.src = src;
-    } else {
+    } else if (!src) {
       setValidUrl(null);
     }
   }, [src, url, onError]);

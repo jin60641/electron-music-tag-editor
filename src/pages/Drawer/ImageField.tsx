@@ -9,6 +9,7 @@ import React, {
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import { makeStyles } from '@material-ui/core/styles';
+import clsx from 'clsx';
 import { getType } from 'typesafe-actions';
 
 import actions from 'store/music/actions';
@@ -29,6 +30,7 @@ const useStyles = makeStyles((theme) => ({
     textAlign: 'center',
   },
   label: {
+    position: 'relative',
     display: 'flex',
     width: '100%',
     paddingTop: '100%',
@@ -39,8 +41,19 @@ const useStyles = makeStyles((theme) => ({
     backgroundSize: 'contain',
     backgroundRepeat: 'no-repeat',
     cursor: 'pointer',
-    boxSizing: 'content-box',
+    boxSizing: 'border-box',
   },
+  drag: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    border: '10px solid black',
+    borderRadius: 4,
+    display: 'none',
+  },
+  dragging: { display: 'block' },
 }));
 
 interface Size {
@@ -89,9 +102,20 @@ const ImageInput: FC<Props> = ({
   const [contextAnchor, setContextAnchor] = React.useState<ContextAnchor>(initialContextAnchor);
   const [imgUrl, setImgUrl] = useState<string | undefined>(undefined);
   const [size, setSize] = useState({ ...initialSize });
+  const [isFileDragging, setIsFileDragging] = useState(false);
   const classes = useStyles();
 
-  const handleChangeUrl = useCallback(async (url?: string, file?: File, buffer?: Uint8Array) => {
+  const handleChangeUrl = useCallback(async ({
+    url,
+    file,
+    buffer,
+    isExternal,
+  }: {
+    url?: string,
+    file?: File,
+    buffer?: Uint8Array,
+    isExternal?: boolean,
+  }) => {
     if (!url) {
       setImgUrl(url);
       setSize({ ...initialSize });
@@ -107,10 +131,42 @@ const ImageInput: FC<Props> = ({
       setValue((file as any).path);
     } else if (buffer) {
       setValue(buffer as any);
+    } else if (isExternal) {
+      setValue(url);
     } else {
       setValue(undefined);
     }
   }, [setValue]);
+
+  const handleDragEnter = useCallback(() => {
+    setIsFileDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback(() => {
+    setIsFileDragging(false);
+  }, []);
+
+  const handleDragOver = useCallback((e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
+    setIsFileDragging(true);
+  }, []);
+
+  const handleDrop = useCallback((e) => {
+    setIsFileDragging(false);
+    let url: string | undefined = e.dataTransfer.getData('url');
+    if (e.dataTransfer.files?.length) {
+      const [file] = e.dataTransfer.files;
+      (async () => {
+        url = await getUrlFromFile(file);
+        if (url) {
+          handleChangeUrl({ url, file });
+        }
+      })();
+    } else if (url) {
+      handleChangeUrl({ url, isExternal: true });
+    }
+  }, [handleChangeUrl]);
 
   const handleChangeFile = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     e.persist();
@@ -122,7 +178,7 @@ const ImageInput: FC<Props> = ({
 
     const url = await getUrlFromFile(file);
     if (url) {
-      handleChangeUrl(url, file);
+      handleChangeUrl({ url, file });
     }
     e.target.value = '';
     e.target.files = null;
@@ -162,7 +218,7 @@ const ImageInput: FC<Props> = ({
 
   const handleDelete = useCallback(() => {
     setValue('');
-    handleChangeUrl('');
+    handleChangeUrl({ url: '' });
     handleClose();
   }, [handleClose, setValue, handleChangeUrl]);
 
@@ -178,7 +234,7 @@ const ImageInput: FC<Props> = ({
     if (buffer?.length) {
       const blob = new Blob([buffer], { type: 'image/png' });
       const url = await readFileSync(blob);
-      handleChangeUrl(url, undefined, buffer);
+      handleChangeUrl({ url, buffer });
     }
     handleClose();
   }, [handleClose, handleChangeUrl]);
@@ -186,17 +242,20 @@ const ImageInput: FC<Props> = ({
   useEffect(() => {
     if (!(defaultValue instanceof Uint8Array)) {
       setImgUrl((n) => (n === defaultValue ? n : undefined));
-      handleChangeUrl(defaultValue);
+      handleChangeUrl({ url: defaultValue });
     }
   }, [defaultValue, handleChangeUrl]);
 
   return (
     <>
-      <div className={classes.wrap}>
+      <div
+        className={classes.wrap}
+      >
         <label
           htmlFor='file'
           className={classes.label}
           style={imgUrl ? { backgroundImage: `url('${imgUrl}')` } : undefined}
+          onDragEnter={handleDragEnter}
           onContextMenu={handlePictureRightClick}
         >
           <input
@@ -205,6 +264,16 @@ const ImageInput: FC<Props> = ({
             hidden
             accept='image/jpeg, image/png'
             onChange={handleChangeFile}
+          />
+          <div
+            onDragEnter={handleDragEnter}
+            onDragLeave={handleDragLeave}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+            className={clsx(
+              classes.drag,
+              isFileDragging && classes.dragging,
+            )}
           />
         </label>
         {imgUrl === undefined && (

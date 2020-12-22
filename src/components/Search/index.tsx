@@ -1,6 +1,9 @@
 import React from 'react';
 
-import { useDispatch, useSelector } from 'react-redux';
+import {
+  // useDispatch,
+  useSelector,
+} from 'react-redux';
 
 import { RootState } from 'store/types';
 
@@ -11,7 +14,7 @@ const selector = ({ table: { search }, layout: { search: isVisible } }: RootStat
 
 const Search = () => {
   const { search, isVisible } = useSelector(selector);
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
   if (!isVisible) {
     return null;
   }

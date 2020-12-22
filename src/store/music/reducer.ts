@@ -94,16 +94,28 @@ const musicReducer = createReducer<MusicState>(initialState)
     ...state,
     list: [action.payload],
   }))
-  .handleAction(musicActions.saveMusic.request, (state, action) => ({
+  .handleAction(musicActions.saveMusic, (state, action) => ({
     ...state,
-    list: state.list.map((item) => action.payload.filePaths.includes(item.path) ? ({
+    lastCount: state.list.length - action.payload.filePaths.length,
+    count: state.list.length - action.payload.filePaths.length,
+    list: state.list.map((item) => (action.payload.filePaths.includes(item.path) ? ({
       ...item,
       metadata: {
         ...item.metadata,
         ...action.payload.metadata,
       },
-    }) : item)
+    }) : item)),
   }))
+  .handleAction(musicActions.updateMusic.success, (state, action) => {
+    const list = [...state.list];
+    const index = state.list.findIndex(({ path }) => path === action.payload.path);
+    list[index] = { ...action.payload, isSelected: list[index].isSelected };
+    return {
+      ...state,
+      list,
+      count: state.count + 1,
+    };
+  })
   .handleAction(musicActions.addMusic.success, (state, action) => {
     const list = [...state.list];
     const index = state.list.findIndex(({ path }) => path === action.payload.path);
