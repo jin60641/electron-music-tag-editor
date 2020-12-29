@@ -234,35 +234,48 @@ const createWindow = () => {
   ipcMain.on('MUSIC.SAVE_MUSIC', async (_event, {
     filePaths,
     metadata: {
-      albumartist: TPE2,
-      comment: COMM = '',
-      picture,
+      albumartist: performerInfo,
+      track: trackNumber,
+      comment,
+      picture: image,
       ...metadata
     },
   }) => {
-    const tags = { COMM, ...metadata };
-    if (TPE2 !== undefined) {
-      tags.TPE2 = TPE2;
+    const tags = {
+      ...metadata,
+      comment,
+      trackNumber,
+      performerInfo,
+    };
+    if (comment) {
+      tags.comment = {
+        language: 'eng',
+        text: comment,
+      };
     }
-    if (picture !== undefined) {
-      const [APIC] = picture;
-      if (APIC instanceof Uint8Array) {
-        tags.APIC = Buffer.from(APIC);
-      } else if (/https?:\/\//.test(APIC) && !fs.existsSync(APIC)) { // external img
-        const response = await fetch(APIC);
+    if (image !== undefined) {
+      if (image instanceof Uint8Array) {
+        tags.image = Buffer.from(image);
+      } else if (/https?:\/\//.test(image) && !fs.existsSync(image)) { // external file path (ex. https://your.web/img.jpg)
+        const response = await fetch(image);
         const arrayBuffer = await response.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
-        tags.APIC = buffer;
-      } else {
-        tags.APIC = APIC;
+        tags.image = buffer;
+      } else { // local file path (ex. ~/img.jpg) or empty string
+        tags.image = image;
       }
     }
+    const deletedTags = Object.entries(tags)
+      .filter(([_key, value]) => value === '')
+      .map(([key]) => key);
     filePaths.forEach((filePath: string) => {
-      NodeID3.update(tags, filePath, (err) => {
-        if (!err) {
-          saveMusic(win, filePath);
-        }
+      const updatedTags = Object.assign(NodeID3.read(filePath, { noRaw: true }), tags);
+      (NodeID3 as any).removeTags();
+      deletedTags.forEach((tag) => {
+        delete updatedTags[tag];
       });
+      NodeID3.write(updatedTags, filePath);
+      saveMusic(win, filePath);
     });
   });
 };

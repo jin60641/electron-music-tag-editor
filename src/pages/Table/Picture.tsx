@@ -33,7 +33,7 @@ const Picture: React.FC<Props> = ({ rowData }) => {
   const [init, setInit] = useState(false);
   const path = useMemo(() => rowData?.path, [rowData]);
   const picture = useMemo(() => rowData?.metadata?.picture, [rowData]);
-  const src = useMemo(() => picture?.[0], [picture]);
+  const src = useMemo(() => picture, [picture]);
   const [validUrl, setValidUrl] = useState<string | null>(null);
   const classes = useStyles();
 

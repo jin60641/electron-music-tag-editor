@@ -9,11 +9,9 @@ const transform = createTransform((state: MusicState['list'], key) => (key === '
     picture,
     ...metadata
   },
-  url,
   ...item
 }) => ({
   ...item,
-  url: '',
   metadata,
 })) : state));
 

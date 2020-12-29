@@ -186,7 +186,7 @@ const Drawer: React.FC = () => {
       (!!option && option.value !== undefined) ? ({
         ...obj,
         [key]: option.value,
-      }) : obj), picture === undefined ? {} : { picture: picture.length ? [picture] : [] });
+      }) : obj), picture === undefined ? {} : { picture });
     dispatch(musicActions.saveMusic({
       filePaths,
       metadata,

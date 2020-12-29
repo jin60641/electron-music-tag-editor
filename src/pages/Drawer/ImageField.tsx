@@ -188,7 +188,7 @@ const ImageInput: FC<Props> = ({
     if (!ids || list.length !== 1) {
       return undefined;
     }
-    return list[0].metadata.picture?.[0];
+    return list[0].metadata.picture;
   }, [list, ids]);
 
   useEffect(() => {

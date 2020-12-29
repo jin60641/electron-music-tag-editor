@@ -1,5 +1,3 @@
-import { IAudioMetadata } from 'music-metadata-browser';
-
 export interface MusicState {
   list: Music[],
   count: number,
@@ -36,33 +34,42 @@ export enum Actions {
 export const initialState: MusicState = { list: [], count: 0, lastCount: 0 };
 
 export interface Music {
-  // buffer: Uint8Array,
-  // blob: Blob,
   path: string,
-  url: string,
   metadata: Metadata,
   isSelected: boolean,
 }
 
 export interface OpenMusicRequestPayload {
   path: string,
-  buffer: Uint8Array,
+  metadata: RawMetadata,
 }
 
 export type AddMusicRequestPayload = OpenMusicRequestPayload;
 export type UpdateMusicRequestPayload = OpenMusicRequestPayload;
 
-export interface Metadata extends Pick<IAudioMetadata['common'],
-'title' |
-'artist' |
-'album' |
-'albumartist'
-> {
-  genre: string,
-  composer: string,
-  track: string,
-  comment: string,
-  picture?: (string | Uint8Array)[],
+export interface Metadata extends Omit<RawMetadata, 'image' | 'comment' | 'performerInfo' | 'trackNumber'>{
+  albumartist?: string,
+  track?: string,
+  comment?: string,
+  picture?: string | Uint8Array,
+}
+
+export interface RawMetadata {
+  title?: string,
+  artist?: string,
+  album?: string,
+  genre?: string,
+  trackNumber?: string,
+  // partOfSet?: string,
+  performerInfo?: string,
+  composer?: string,
+  comment?: {
+    text: string,
+  },
+  image?: {
+    mime: string,
+    imageBuffer: Uint8Array[],
+  },
 }
 
 export interface SaveMusicPayload {
