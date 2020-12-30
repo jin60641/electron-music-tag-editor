@@ -51,12 +51,13 @@
     "typescript": "^4.1.3"
   },
   "scripts": {
-    "react:start": "react-app-rewired start",
+    "react:start": "cross-env BROWSER=none react-app-rewired start",
     "react:build": "react-app-rewired build",
     "react:test": "react-app-rewired test",
     "react:eject": "react-scripts eject",
     "electron:build": "yarn tsc ./electron/* --outDir ./public",
-    "start": "concurrently \"cross-env BROWSER=none yarn react:start\" \"yarn electron:build\" \"wait-on http://localhost:3000 && electron .\"",
+    "electron": "cross-env NODE_ENV=dev nodemon --exec \"\"electron .\"\"",
+    "start": "concurrently \"yarn react:start\" \"node scripts/electron-start.ts\"",
     "build": "yarn electron:build && yarn react:build && electron-builder",
     "release": "yarn react:build && electron-builder --publish=always",
     "lint": "eslint -c .eslintrc.js '{src,electron}/**/*.{ts,tsx}'"
@@ -83,11 +84,13 @@
     "concurrently": "^5.3.0",
     "cross-env": "^7.0.2",
     "electron-builder": "^22.8.1",
+    "electron-reload": "^1.5.0",
     "eslint-config-airbnb-typescript": "^12.0.0",
     "eslint-plugin-import": "^2.22.0",
     "eslint-plugin-jsx-a11y": "^6.3.1",
     "eslint-plugin-react": "^7.20.3",
     "eslint-plugin-react-hooks": "^4.0.8",
+    "nodemon": "^2.0.6",
     "wait-on": "^5.2.0"
   },
   "build": {
