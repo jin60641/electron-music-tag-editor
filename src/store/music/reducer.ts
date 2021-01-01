@@ -40,6 +40,10 @@ const musicReducer = createReducer<MusicState>(initialState)
       isSelected: i === action.payload,
     })),
   }))
+  .handleAction(musicActions.removeMusic, (state, action) => ({
+    ...state,
+    list: state.list.filter((item) => !action.payload.filePaths.includes(item.path)),
+  }))
   .handleAction(musicActions.selectMusicMulti, (state, action) => ({
     ...state,
     lastSelected: action.payload,

@@ -13,6 +13,7 @@ export enum Actions {
   SELECT_MUSIC_MULTI = 'MUSIC.SELECT_MUSIC_MULTI',
   SELECT_MUSIC_ALL = 'MUSIC.SELECT_MUSIC_ALL',
   RESET_MUSIC = 'MUSIC.RESET_MUSIC',
+  REMOVE_MUSIC = 'MUSIC.REMOVE_MUSIC',
 
   OPEN_MUSIC_REQUEST = 'MUSIC.OPEN_MUSIC',
   OPEN_MUSIC_SUCCESS = 'MUSIC.OPEN_MUSIC#SUCCESS',
@@ -40,16 +41,17 @@ export interface Music {
 }
 
 export interface OpenMusicRequestPayload {
-  path: string,
+  path: Music['path'],
   metadata: RawMetadata,
 }
 
 export type AddMusicRequestPayload = OpenMusicRequestPayload;
 export type UpdateMusicRequestPayload = OpenMusicRequestPayload;
 
-export interface Metadata extends Omit<RawMetadata, 'image' | 'comment' | 'performerInfo' | 'trackNumber'>{
+export interface Metadata extends Omit<RawMetadata, 'image' | 'comment' | 'performerInfo' | 'partOfSet' | 'trackNumber'>{
   albumartist?: string,
   track?: string,
+  disk?: string,
   comment?: string,
   picture?: string | Uint8Array,
 }
@@ -60,7 +62,7 @@ export interface RawMetadata {
   album?: string,
   genre?: string,
   trackNumber?: string,
-  // partOfSet?: string,
+  partOfSet?: string,
   performerInfo?: string,
   composer?: string,
   comment?: {
@@ -75,4 +77,8 @@ export interface RawMetadata {
 export interface SaveMusicPayload {
   filePaths: Music['path'][];
   metadata: Partial<Metadata>;
+}
+
+export interface RemoveMusicPayload {
+  filePaths: Music['path'][];
 }

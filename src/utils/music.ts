@@ -13,6 +13,7 @@ export const bufferToMusic: (payload: OpenMusicRequestPayload) => Promise<Music>
   metadata: {
     image,
     trackNumber: track,
+    partOfSet: disk,
     comment: { text: comment } = {},
     performerInfo: albumartist,
     ...other
@@ -25,6 +26,7 @@ export const bufferToMusic: (payload: OpenMusicRequestPayload) => Promise<Music>
     ...other,
     albumartist,
     track,
+    disk,
     comment,
     picture: image
       ? await readFileSync(new Blob([image.imageBuffer as unknown as BlobPart], { type: `image/${image.mime}` }))

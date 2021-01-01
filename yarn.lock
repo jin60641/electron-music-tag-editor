@@ -8940,10 +8940,10 @@ node-forge@^0.10.0:
   resolved "https://registry.yarnpkg.com/node-forge/-/node-forge-0.10.0.tgz#32dea2afb3e9926f02ee5ce8794902691a676bf3"
   integrity sha512-PPmu8eEeG9saEUvI97fm4OYxXVB6bFvyNTyiUOBichBpFG8A1Ljw3bY62+5oOjDEMHRnd0Y7HQ+x7uzxOzC6JA==
 
-node-id3@^0.2.1:
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/node-id3/-/node-id3-0.2.1.tgz#41835238d7687b875b08cce0bb160c5cea0bbabc"
-  integrity sha512-VWYgLP3x+J+8HAcxISn69N7tjF7dJcom79uU51/6npb4U3vncUxMxJe1FKD8NbtKe74K22tk+oOkibHePg9VMg==
+node-id3@^0.2.2:
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/node-id3/-/node-id3-0.2.2.tgz#4267d35cc994140d457d79ce7949308f57414e8f"
+  integrity sha512-DIk1gL6iWupo4odBqFc9d5C4h081M3Bb8ASJ8YlVF+6jpLH4FWukrNXI0PxLUDxFIuiQr4dQ0GzBVsrmMnRLJg==
   dependencies:
     iconv-lite "0.6.2"
 

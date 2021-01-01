@@ -5,6 +5,7 @@ import {
   AddMusicRequestPayload,
   Music,
   OpenMusicRequestPayload,
+  RemoveMusicPayload,
   SaveMusicPayload,
   UpdateMusicRequestPayload,
 } from './types';
@@ -38,6 +39,10 @@ boolean
 const resetMusic = createAction(
   Actions.RESET_MUSIC,
 )();
+
+const removeMusic = createAction(
+  Actions.REMOVE_MUSIC,
+)<RemoveMusicPayload>();
 
 const openMusic = createAsyncAction(
   Actions.OPEN_MUSIC_REQUEST,
@@ -84,4 +89,5 @@ export default {
   selectMusicAdd,
   selectMusicMulti,
   setCount,
+  removeMusic,
 };

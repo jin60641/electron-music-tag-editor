@@ -236,6 +236,7 @@ const createWindow = () => {
     metadata: {
       albumartist: performerInfo,
       track: trackNumber,
+      disk: partOfSet,
       comment,
       picture: image,
       ...metadata
@@ -245,14 +246,17 @@ const createWindow = () => {
       ...metadata,
       comment,
       trackNumber,
+      partOfSet,
       performerInfo,
     };
+
     if (comment) {
       tags.comment = {
         language: 'eng',
         text: comment,
       };
     }
+
     if (image !== undefined) {
       if (image instanceof Uint8Array) {
         tags.image = Buffer.from(image);
@@ -265,16 +269,16 @@ const createWindow = () => {
         tags.image = image;
       }
     }
+
     const deletedTags = Object.entries(tags)
       .filter(([_key, value]) => value === '')
       .map(([key]) => key);
+
+    deletedTags.forEach((tag) => {
+      delete tags[tag];
+    });
     filePaths.forEach((filePath: string) => {
-      const updatedTags = Object.assign(NodeID3.read(filePath, { noRaw: true }), tags);
-      (NodeID3 as any).removeTags();
-      deletedTags.forEach((tag) => {
-        delete updatedTags[tag];
-      });
-      NodeID3.write(updatedTags, filePath);
+      NodeID3.update(tags, filePath, { exclude: deletedTags });
       saveMusic(win, filePath);
     });
   });

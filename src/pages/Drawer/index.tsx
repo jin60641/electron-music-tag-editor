@@ -90,6 +90,9 @@ const FIELDS: { key: FieldKeys, label: string }[] = [{
 }, {
   key: 'track',
   label: '트랙',
+}, {
+  key: 'disk',
+  label: '디스크',
 }];
 
 type Values = {
@@ -111,6 +114,7 @@ const initialValues: Values = {
   genre: defaultOption,
   composer: defaultOption,
   track: defaultOption,
+  disk: defaultOption,
 };
 
 const initialOptions: Options = {
@@ -122,6 +126,7 @@ const initialOptions: Options = {
   genre: [],
   composer: [],
   track: [],
+  disk: [],
 };
 
 const Drawer: React.FC = () => {

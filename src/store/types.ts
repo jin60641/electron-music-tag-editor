@@ -27,6 +27,7 @@ export type RootAction =
 
 export const channels = [
   musicActions.resetMusic,
+  musicActions.removeMusic,
   musicActions.setCount,
   musicActions.addMusic.request,
   musicActions.updateMusic.request,

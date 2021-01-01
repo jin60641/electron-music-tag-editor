@@ -150,6 +150,11 @@ const COLUMNS: Columns = {
     dataKey: 'track',
     cellDataGetter,
   },
+  disk: {
+    label: '디스크',
+    dataKey: 'disk',
+    cellDataGetter,
+  },
   comment: {
     label: '코멘트',
     dataKey: 'comment',
