@@ -21,6 +21,7 @@ import Loading from 'components/Loading';
 import Search from 'components/Search';
 import { drawerWidth } from 'store/layout/types';
 import musicActions from 'store/music/actions';
+import { Music } from 'store/music/types';
 import tableActions from 'store/table/actions';
 import { DataKey } from 'store/table/types';
 import { RootState } from 'store/types';
@@ -91,6 +92,8 @@ const cellDataGetter: ColumnProps['cellDataGetter'] = ({
   dataKey,
   rowData,
 }) => rowData.metadata[dataKey];
+
+const getFilenameFromPath = (path: string) => path.split('/').slice(-1);
 
 const COLUMNS: Columns = {
   isSelected: {
@@ -163,7 +166,7 @@ const COLUMNS: Columns = {
   filename: {
     label: '파일명',
     dataKey: 'filename',
-    cellDataGetter: ({ rowData: { path } }) => path.split('/').slice(-1),
+    cellDataGetter: ({ rowData: { path } }) => getFilenameFromPath(path),
   },
 };
 
@@ -213,7 +216,8 @@ const Table: React.FC = () => {
   const [contextAnchor, setContextAnchor] = React.useState<{
     mouseX: null | number;
     mouseY: null | number;
-    columnIndex?: number;
+    column?: ColumnItem;
+    row?: Music;
   }>(initialContextAnchor);
   const width = Math.max(
     document.documentElement.clientWidth || 0,
@@ -233,6 +237,8 @@ const Table: React.FC = () => {
     ) * (sortDirection === SortDirection.ASC ? -1 : 1);
   }), [sortBy, sortDirection, list]);
 
+  const selectedRows = useMemo(() => rows.filter(({ isSelected }) => !!isSelected), [rows]);
+
   const handleClickRow = useCallback(({ index, event: e }: RowMouseEventHandlerParams) => {
     e.preventDefault();
     e.stopPropagation();
@@ -248,6 +254,20 @@ const Table: React.FC = () => {
       dispatch(musicActions.selectMusic(index));
     }
   }, [dispatch]);
+
+  const handleRightClickRow = useCallback((params: RowMouseEventHandlerParams) => {
+    const { event: e, index } = params;
+    if (!rows[index].isSelected) {
+      handleClickRow(params);
+    }
+    if (index >= 0) {
+      setContextAnchor({
+        mouseX: e.clientX - 2,
+        mouseY: e.clientY - 4,
+        row: rows[index],
+      });
+    }
+  }, [handleClickRow, rows]);
 
   const getRowClassName: TableProps['rowClassName'] = ({ index }) => clsx(
     classes.tableRow,
@@ -287,17 +307,25 @@ const Table: React.FC = () => {
       setContextAnchor({
         mouseX: e.clientX - 2,
         mouseY: e.clientY - 4,
-        columnIndex,
+        column: columns[columnIndex],
       });
     }
-  }, []);
+  }, [columns]);
 
   const handleClickRemoveColumn = useCallback(() => {
-    if (contextAnchor.columnIndex) {
+    if (contextAnchor.column && columns.length) {
       handleCloseContextMenu();
-      dispatch(tableActions.removeColumn(contextAnchor.columnIndex));
+      dispatch(tableActions.removeColumn(contextAnchor.column.dataKey));
     }
-  }, [dispatch, contextAnchor, handleCloseContextMenu]);
+  }, [dispatch, columns, contextAnchor, handleCloseContextMenu]);
+
+  const handleClickRemoveRow = useCallback(() => {
+    if (contextAnchor.row) {
+      handleCloseContextMenu();
+      const filePaths = selectedRows.map(({ path }) => path);
+      dispatch(musicActions.removeMusic({ filePaths }));
+    }
+  }, [dispatch, contextAnchor, handleCloseContextMenu, selectedRows]);
 
   const tableProps = {
     rowHeight,
@@ -306,6 +334,7 @@ const Table: React.FC = () => {
     sortBy,
     sortDirection,
     onRowClick: handleClickRow,
+    onRowRightClick: handleRightClickRow,
     rowCount: rows.length,
   };
 
@@ -333,6 +362,8 @@ const Table: React.FC = () => {
       e.dataTransfer.clearData();
     }
   }, []);
+
+  console.log(selectedRows);
 
   return (
     <>
@@ -423,9 +454,16 @@ const Table: React.FC = () => {
                           : undefined
                       }
                     >
-                      {!!contextAnchor.columnIndex && (
+                      {!!contextAnchor.column && (
                         <MenuItem onClick={handleClickRemoveColumn}>
-                          {`'${columns[contextAnchor.columnIndex].dataKey}' 제거`}
+                          {`'${contextAnchor.column.label}' 제거`}
+                        </MenuItem>
+                      )}
+                      {!!contextAnchor.row && (
+                        <MenuItem onClick={handleClickRemoveRow}>
+                          {`'${contextAnchor.row.metadata.title || getFilenameFromPath(contextAnchor.row.path)}'`}
+                          {selectedRows.length >= 2 && ` 외 ${selectedRows.length - 1}곡`}
+                          {' 제거'}
                         </MenuItem>
                       )}
                     </Menu>

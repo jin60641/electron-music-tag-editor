@@ -38,7 +38,8 @@ const tableReducer = createReducer(initialState)
   }))
   .handleAction(tableActions.removeColumn, (state, action) => {
     const columns = [...state.columns];
-    columns.splice(action.payload, 1);
+    const index = state.columns.findIndex(({ dataKey }) => dataKey === action.payload);
+    columns.splice(index, 1);
     return {
       ...state,
       columns,

@@ -4,7 +4,7 @@ import { Metadata } from 'store/music/types';
 
 export type DataKey = keyof Metadata | 'isSelected' | 'filename';
 
-interface Column {
+export interface Column {
   dataKey: DataKey,
   width: number,
 }
@@ -87,6 +87,6 @@ export interface SetColumnOrderPayload {
   destination: number,
 }
 
-export type RemoveColumnPayload = number;
+export type RemoveColumnPayload = Column['dataKey'];
 
 export type SetColumnsPayload = TableState['columns'];
