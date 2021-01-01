@@ -274,11 +274,15 @@ const createWindow = () => {
       .filter(([_key, value]) => value === '')
       .map(([key]) => key);
 
-    deletedTags.forEach((tag) => {
-      delete tags[tag];
-    });
     filePaths.forEach((filePath: string) => {
-      NodeID3.update(tags, filePath, { exclude: deletedTags });
+      const updatedTags = { ...NodeID3.read(filePath, { noRaw: true }), ...tags };
+      deletedTags.forEach((tag) => {
+        delete updatedTags[tag];
+      });
+      if (updatedTags.image?.mime) {
+        delete updatedTags.image.mime;
+      }
+      NodeID3.write(updatedTags, filePath);
       saveMusic(win, filePath);
     });
   });

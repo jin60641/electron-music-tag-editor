@@ -363,8 +363,6 @@ const Table: React.FC = () => {
     }
   }, []);
 
-  console.log(selectedRows);
-
   return (
     <>
       <Loading />
