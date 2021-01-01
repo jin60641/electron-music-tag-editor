@@ -112,6 +112,17 @@ const TableHeaderCell: React.FC<TableHeaderCellProps> = ({
     onRightClick(e, columnIndex);
   }, [onRightClick, columnIndex]);
 
+  const handleDoubleClick = useCallback((e) => {
+    e.stopPropagation();
+    dispatch(tableActions.setColumnWidth({
+      dataKey,
+      width: [...document.querySelectorAll(`[aria-colindex="${columnIndex + 1}"]`)].reduce((max, element) => Math.max(
+        max,
+        (element.firstElementChild?.scrollWidth || 0) + 10,
+      ), 56),
+    }));
+  }, [dataKey, dispatch]);
+
   const tableCellProps: Partial<RVTableCellProps> & TableCellProps = {
     component: 'div',
     className: classes.tableCell,
@@ -181,6 +192,7 @@ const TableHeaderCell: React.FC<TableHeaderCellProps> = ({
             onClick={(e) => {
               e.stopPropagation();
             }}
+            onDoubleClick={handleDoubleClick}
           >
             :
           </div>
