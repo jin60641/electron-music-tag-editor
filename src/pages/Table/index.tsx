@@ -85,6 +85,7 @@ const useStyles = makeStyles((theme) => ({
     borderBottom: '1px solid rgba(224, 224, 224, 1)',
     cursor: 'pointer',
   },
+  tableRowCursor: { backgroundColor: theme.palette.grey[200] },
   tableRowHover: { '&:hover': { backgroundColor: theme.palette.grey[200] } },
 }));
 
@@ -171,7 +172,10 @@ const COLUMNS: Columns = {
 };
 
 const selector = ({
-  music: { list },
+  music: {
+    list,
+    lastSelected,
+  },
   table: {
     columns,
     sortBy,
@@ -191,6 +195,7 @@ const selector = ({
   rowHeight,
   headerHeight,
   isDrawerOpen,
+  lastSelected,
 });
 
 const initialContextAnchor = {
@@ -208,6 +213,7 @@ const Table: React.FC = () => {
     rowHeight,
     headerHeight,
     isDrawerOpen,
+    lastSelected,
   } = useSelector(selector, shallowEqual);
   const classes = useStyles();
 
@@ -269,11 +275,14 @@ const Table: React.FC = () => {
     }
   }, [handleClickRow, rows]);
 
-  const getRowClassName: TableProps['rowClassName'] = ({ index }) => clsx(
+  const getRowClassName: TableProps['rowClassName'] = useCallback(({ index }) => clsx(
     classes.tableRow,
     classes.flexContainer,
-    { [classes.tableRowHover]: index !== -1 && handleClickRow != null },
-  );
+    {
+      [classes.tableRowHover]: index !== -1 && handleClickRow != null,
+      [classes.tableRowCursor]: index === lastSelected,
+    },
+  ), [handleClickRow, lastSelected]);
 
   const handleSort = useCallback((payload) => {
     dispatch(tableActions.setSort(payload));
@@ -312,6 +321,11 @@ const Table: React.FC = () => {
     }
   }, [columns]);
 
+  const dispatchRemoveMusics = useCallback(() => {
+    const filePaths = selectedRows.map(({ path }) => path);
+    dispatch(musicActions.removeMusic({ filePaths }));
+  }, [dispatch, selectedRows]);
+
   const handleClickRemoveColumn = useCallback(() => {
     if (contextAnchor.column && columns.length) {
       handleCloseContextMenu();
@@ -322,10 +336,9 @@ const Table: React.FC = () => {
   const handleClickRemoveRow = useCallback(() => {
     if (contextAnchor.row) {
       handleCloseContextMenu();
-      const filePaths = selectedRows.map(({ path }) => path);
-      dispatch(musicActions.removeMusic({ filePaths }));
+      dispatchRemoveMusics();
     }
-  }, [dispatch, contextAnchor, handleCloseContextMenu, selectedRows]);
+  }, [dispatch, contextAnchor, handleCloseContextMenu, dispatchRemoveMusics]);
 
   const tableProps = {
     rowHeight,
@@ -362,6 +375,26 @@ const Table: React.FC = () => {
       e.dataTransfer.clearData();
     }
   }, []);
+
+  const handleKeyDown = useCallback((e) => {
+    e.preventDefault();
+    console.log(e.key);
+    if (e.key === 'ArrowDown') {
+      dispatch(musicActions.setLastSelected(Math.min(
+        lastSelected === undefined ? 0 : lastSelected + 1,
+        rows.length - 1,
+      )));
+    } else if (e.key === 'ArrowUp') {
+      dispatch(musicActions.setLastSelected(Math.max(
+        lastSelected === undefined ? 0 : lastSelected - 1,
+        0,
+      )));
+    } else if (e.key === 'Backspace') {
+      dispatchRemoveMusics();
+    } else if (e.key === ' ' && lastSelected !== undefined) {
+      dispatch(musicActions.selectMusicAdd(lastSelected));
+    }
+  }, [dispatch, lastSelected, rows, dispatchRemoveMusics]);
 
   return (
     <>
@@ -400,6 +433,9 @@ const Table: React.FC = () => {
                       width,
                       height,
                     }}
+                    role='searchbox'
+                    onKeyDown={handleKeyDown}
+                    tabIndex={0}
                   >
                     <RVTable
                       className={classes.table}

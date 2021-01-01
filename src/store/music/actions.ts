@@ -18,6 +18,12 @@ const selectMusic = createAction(
 number
 >();
 
+const setLastSelected = createAction(
+  Actions.SET_LAST_SELECTED,
+)<
+number
+>();
+
 const selectMusicMulti = createAction(
   Actions.SELECT_MUSIC_MULTI,
 )<
@@ -90,4 +96,5 @@ export default {
   selectMusicMulti,
   setCount,
   removeMusic,
+  setLastSelected,
 };

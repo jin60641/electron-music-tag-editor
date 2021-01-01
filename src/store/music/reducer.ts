@@ -27,6 +27,10 @@ const musicReducer = createReducer<MusicState>(initialState)
     count: 0,
     list: [],
   }))
+  .handleAction(musicActions.setLastSelected, (state, action) => ({
+    ...state,
+    lastSelected: action.payload,
+  }))
   .handleAction(musicActions.setCount, (state, action) => ({
     ...state,
     count: state.count + action.payload,
