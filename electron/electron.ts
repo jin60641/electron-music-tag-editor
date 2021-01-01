@@ -213,6 +213,11 @@ const createWindow = () => {
   const menu = Menu.buildFromTemplate(template as MenuItemConstructorOptions[]);
   Menu.setApplicationMenu(menu);
 
+  ipcMain.on('MUSIC.OPEN_FINDER', (_event, filePath) => {
+    console.log(filePath);
+    shell.showItemInFolder(filePath)
+  });
+
   ipcMain.on('MUSIC.OPEN_MUSIC', (_event, dirPaths: string[]) => {
     dirPaths.forEach((dirPath) => {
       if (fs.lstatSync(dirPath).isDirectory()) {

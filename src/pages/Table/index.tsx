@@ -401,6 +401,13 @@ const Table: React.FC = () => {
     }
   }, [dispatch, lastSelected, rows, dispatchRemoveMusics]);
 
+  const handleClickOpenFinder = useCallback(() => {
+    if (contextAnchor.row?.path) {
+      window.bridge.ipc.send(getType(musicActions.openFinder), contextAnchor.row.path);
+      handleCloseContextMenu();
+    }
+  }, [contextAnchor]);
+
   return (
     <>
       <Loading />
@@ -503,6 +510,11 @@ const Table: React.FC = () => {
                           {`'${contextAnchor.row.metadata.title || getFilenameFromPath(contextAnchor.row.path)}'`}
                           {selectedRows.length >= 2 && ` 외 ${selectedRows.length - 1}곡`}
                           {' 제거'}
+                        </MenuItem>
+                      )}
+                      {!!contextAnchor.row && (
+                        <MenuItem onClick={handleClickOpenFinder}>
+                          Show in finder
                         </MenuItem>
                       )}
                     </Menu>

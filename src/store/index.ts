@@ -2,7 +2,7 @@ import { applyMiddleware, compose, createStore } from 'redux';
 import { createLogger } from 'redux-logger';
 import { createEpicMiddleware } from 'redux-observable';
 import { persistStore } from 'redux-persist';
-import { getType } from 'typesafe-actions';
+import { ActionCreator, getType } from 'typesafe-actions';
 
 import rootEpic from './epic';
 import rootReducer from './reducer';
@@ -29,7 +29,7 @@ epicMiddleware.run(rootEpic);
 const persistor = persistStore(store);
 
 channels.forEach((channel) => {
-  window.bridge.ipc.receive(getType(channel), (data) => {
+  window.bridge.ipc.receive(getType(channel as ActionCreator), (data) => {
     store.dispatch(channel(data));
   });
 });

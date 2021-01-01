@@ -84,6 +84,10 @@ Music,
 undefined
 >();
 
+const openFinder = createAction(
+  Actions.OPEN_FINDER,
+)<string>();
+
 export default {
   openMusic,
   addMusic,
@@ -97,4 +101,5 @@ export default {
   setCount,
   removeMusic,
   setLastSelected,
+  openFinder,
 };

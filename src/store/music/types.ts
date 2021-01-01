@@ -31,6 +31,8 @@ export enum Actions {
   SAVE_MUSIC_REQUEST = 'MUSIC.SAVE_MUSIC',
   SAVE_MUSIC_SUCCESS = 'MUSIC.SAVE_MUSIC#SUCCESS',
   SAVE_MUSIC_FAILURE = 'MUSIC.SAVE_MUSIC#FAILURE',
+
+  OPEN_FINDER = 'MUSIC.OPEN_FINDER',
 }
 
 export const initialState: MusicState = { list: [], count: 0, lastCount: 0 };
