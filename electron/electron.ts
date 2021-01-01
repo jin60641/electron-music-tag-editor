@@ -21,9 +21,6 @@ import {
   setCount,
 } from './apis';
 
-// eslint-disable-next-line import/no-extraneous-dependencies
-require('electron-reload');
-
 const close = () => null;
 
 const isMac = process.platform === 'darwin';
