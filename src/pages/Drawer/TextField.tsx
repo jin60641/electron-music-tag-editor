@@ -10,13 +10,13 @@ const filterOptions: (
   options: Option[],
   state: FilterOptionsState<Option>
 ) => Option[] = (options, { inputValue }) => options
-  .filter((option) => option.label.includes(inputValue))
-  .sort((a, b) => a.label.toLowerCase().localeCompare(b.label.toLowerCase()))
-  .slice(0, 5)
   .concat(inputValue.length ? [{
     value: inputValue,
     label: inputValue,
   }] : [])
+  .filter((option) => option.label.includes(inputValue))
+  .sort((a, b) => a.label.toLowerCase().localeCompare(b.label.toLowerCase()))
+  .slice(0, 5)
   .concat([{
     value: '',
     label: '(공란)',
