@@ -121,7 +121,7 @@ const TableHeaderCell: React.FC<TableHeaderCellProps> = ({
         (element.firstElementChild?.scrollWidth || 0) + 10,
       ), 56),
     }));
-  }, [dataKey, dispatch]);
+  }, [dataKey, columnIndex, dispatch]);
 
   const tableCellProps: Partial<RVTableCellProps> & TableCellProps = {
     component: 'div',

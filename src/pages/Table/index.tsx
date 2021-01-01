@@ -62,8 +62,15 @@ const useStyles = makeStyles((theme) => ({
     left: 0,
     width: '100%',
     height: '100vh',
-    border: '10px solid black',
+    background: `linear-gradient(90deg, ${theme.palette.grey[400]} 50%, transparent 50%), linear-gradient(90deg, ${theme.palette.grey[400]} 50%, transparent 50%), linear-gradient(0deg, ${theme.palette.grey[400]} 50%, transparent 50%), linear-gradient(0deg, ${theme.palette.grey[400]} 50%, transparent 50%)`,
+    backgroundRepeat: 'repeat-x, repeat-x, repeat-y, repeat-y',
+    backgroundSize: '15px 4px, 15px 4px, 4px 15px, 4px 15px',
+    animation: '$border-dance 20s infinite linear',
     display: 'none',
+  },
+  '@keyframes border-dance': {
+    '0%': { backgroundPosition: '0 0, 100% 100%, 0 100%, 100% 0' },
+    '100%': { backgroundPosition: '100% 0, 0 100%, 0 0, 100% 100%' },
   },
   dragShift: {
     left: drawerWidth,
@@ -377,7 +384,6 @@ const Table: React.FC = () => {
   }, []);
 
   const handleKeyDown = useCallback((e) => {
-    e.preventDefault();
     if (e.key === 'ArrowDown') {
       dispatch(musicActions.setLastSelected(Math.min(
         lastSelected === undefined ? 0 : lastSelected + 1,
