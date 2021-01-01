@@ -282,7 +282,7 @@ const Table: React.FC = () => {
       [classes.tableRowHover]: index !== -1 && handleClickRow != null,
       [classes.tableRowCursor]: index === lastSelected,
     },
-  ), [handleClickRow, lastSelected]);
+  ), [classes, handleClickRow, lastSelected]);
 
   const handleSort = useCallback((payload) => {
     dispatch(tableActions.setSort(payload));
@@ -338,7 +338,7 @@ const Table: React.FC = () => {
       handleCloseContextMenu();
       dispatchRemoveMusics();
     }
-  }, [dispatch, contextAnchor, handleCloseContextMenu, dispatchRemoveMusics]);
+  }, [contextAnchor, handleCloseContextMenu, dispatchRemoveMusics]);
 
   const tableProps = {
     rowHeight,
@@ -378,7 +378,6 @@ const Table: React.FC = () => {
 
   const handleKeyDown = useCallback((e) => {
     e.preventDefault();
-    console.log(e.key);
     if (e.key === 'ArrowDown') {
       dispatch(musicActions.setLastSelected(Math.min(
         lastSelected === undefined ? 0 : lastSelected + 1,
