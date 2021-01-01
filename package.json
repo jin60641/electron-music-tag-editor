@@ -56,7 +56,7 @@
     "react:test": "react-app-rewired test",
     "react:eject": "react-scripts eject",
     "electron:build": "yarn tsc ./electron/* --outDir ./public",
-    "electron": "cross-env NODE_ENV=dev nodemon --exec \"\"electron .\"\"",
+    "electron": "yarn tsc --watch ./electron/* --outDir ./public",
     "start": "concurrently \"yarn react:start\" \"node scripts/electron-start.ts\"",
     "build": "yarn electron:build && yarn react:build && electron-builder",
     "release": "yarn react:build && electron-builder --publish=always",
