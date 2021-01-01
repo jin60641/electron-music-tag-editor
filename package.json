@@ -58,7 +58,7 @@
     "electron:build": "yarn tsc ./electron/* --outDir ./public",
     "electron:dev": "yarn tsc --watch ./electron/* --outDir ./public",
     "electron": "cross-env NODE_ENV=dev nodemon --exec \"\"electron .\"\"",
-    "start": "concurrently \"yarn electron:dev\" \"yarn react:start\" \"node scripts/electron-start.ts\"",
+    "start": "concurrently \"yarn electron:dev\" \"yarn react:start\" \"wait-on http://localhost:3000 && yarn electron\"",
     "build": "yarn electron:build && yarn react:build && electron-builder",
     "release": "yarn react:build && electron-builder --publish=always",
     "lint": "eslint -c .eslintrc.js '{src,electron}/**/*.{ts,tsx}'"
