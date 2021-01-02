@@ -7,6 +7,7 @@ export type DataKey = keyof Metadata | 'isSelected' | 'filename';
 export interface Column {
   dataKey: DataKey,
   width: number,
+  isSelected: boolean,
 }
 
 export interface TableState {
@@ -22,9 +23,10 @@ export enum Actions {
   SET_COLUMN_WIDTH = 'TABLE.SET_COLUMN_WIDTH',
   SET_COLUMN_ORDER = 'TABLE.SET_COLUMN_ORDER',
   SET_SORT = 'TABLE.SET_SORT',
+  ADD_COLUMN = 'TABLE.ADD_COLUMN',
   REMOVE_COLUMN = 'TABLE.REMOVE_COLUMN',
+  SET_COLUMNS = 'TABLE.SET_COLUMNS',
   SET_SEARCH = 'TABLE.SET_SEARCH',
-  SET_COLUMNS = 'TABLE.SET_COLUMNS', // TODO: 사용자 정의 컬럼 모달용
 }
 
 export type SetSortPayload = Pick<TableState, 'sortBy' | 'sortDirection'>;
@@ -33,39 +35,50 @@ export type ColumnWidth = {
   [key in DataKey]: number;
 };
 
-const initialColumns: Column[] = [{
+export const initialColumns: Column[] = [{
   dataKey: 'isSelected',
   width: 68,
+  isSelected: true,
 }, {
   dataKey: 'picture',
   width: 68,
+  isSelected: true,
 }, {
   dataKey: 'title',
   width: 300,
+  isSelected: true,
 }, {
   dataKey: 'album',
   width: 300,
+  isSelected: true,
 }, {
   dataKey: 'artist',
   width: 180,
+  isSelected: true,
 }, {
   dataKey: 'albumartist',
   width: 180,
+  isSelected: true,
 }, {
   dataKey: 'genre',
   width: 150,
+  isSelected: true,
 }, {
   dataKey: 'composer',
   width: 180,
+  isSelected: true,
 }, {
   dataKey: 'track',
   width: 150,
+  isSelected: true,
 }, {
   dataKey: 'comment',
   width: 300,
+  isSelected: true,
 }, {
   dataKey: 'filename',
   width: 300,
+  isSelected: true,
 }];
 
 export const initialState: TableState = {
@@ -83,10 +96,11 @@ export interface SetColumnWidthPayload {
 }
 
 export interface SetColumnOrderPayload {
-  source: number,
-  destination: number,
+  source: DataKey,
+  destination: DataKey,
+  isReplace?: boolean,
 }
 
+export type AddColumnPayload = Column['dataKey'];
 export type RemoveColumnPayload = Column['dataKey'];
-
 export type SetColumnsPayload = TableState['columns'];

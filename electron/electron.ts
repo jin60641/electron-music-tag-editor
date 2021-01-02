@@ -16,6 +16,7 @@ import * as path from 'path';
 
 import {
   addMusic,
+  openPreference,
   resetMusic,
   saveMusic,
   setCount,
@@ -112,6 +113,11 @@ const createWindow = () => {
       label: app.name,
       submenu: [
         { role: 'about' },
+        {
+          label: 'Preferences...',
+          click: () => openPreference(win),
+          accelerator: 'Command+,',
+        },
       ],
     }] : []),
     // { role: 'fileMenu' }
@@ -214,8 +220,7 @@ const createWindow = () => {
   Menu.setApplicationMenu(menu);
 
   ipcMain.on('MUSIC.OPEN_FINDER', (_event, filePath) => {
-    console.log(filePath);
-    shell.showItemInFolder(filePath)
+    shell.showItemInFolder(filePath);
   });
 
   ipcMain.on('MUSIC.OPEN_MUSIC', (_event, dirPaths: string[]) => {

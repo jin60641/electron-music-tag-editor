@@ -1,6 +1,6 @@
 "use strict";
 exports.__esModule = true;
-exports.saveMusic = exports.addMusic = exports.removeMusic = exports.setCount = exports.resetMusic = void 0;
+exports.openPreference = exports.saveMusic = exports.addMusic = exports.removeMusic = exports.setCount = exports.resetMusic = void 0;
 var fs = require("fs");
 var NodeID3 = require("node-id3");
 var resetMusic = function (win) {
@@ -35,3 +35,7 @@ var saveMusic = function (win, filePath) {
     }));
 };
 exports.saveMusic = saveMusic;
+var openPreference = function (win) {
+    win.webContents.send('LAYOUT.SET_PREFERENCE', '');
+};
+exports.openPreference = openPreference;

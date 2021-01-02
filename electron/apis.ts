@@ -33,3 +33,7 @@ export const saveMusic = (win: BrowserWindow, filePath: string) => {
     path: filePath,
   }));
 };
+
+export const openPreference = (win: BrowserWindow) => {
+  win.webContents.send('LAYOUT.SET_PREFERENCE', '');
+};

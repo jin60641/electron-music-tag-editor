@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 
 import { makeStyles } from '@material-ui/core/styles';
 import TableCell, { TableCellProps } from '@material-ui/core/TableCell';
@@ -18,6 +18,7 @@ import { DataKey } from 'store/table/types';
 import { RootState } from 'store/types';
 
 export interface TableHeaderCellProps extends RVTableHeaderProps, Pick<RVTableCellProps, 'columnIndex'> {
+  width: number,
   isPlaceholder?: boolean,
   dataKey: DataKey,
   disableResize?: boolean,
@@ -82,12 +83,13 @@ const selector = ({
 
 const TableHeaderCell: React.FC<TableHeaderCellProps> = ({
   label,
-  columnIndex,
   numeric,
   disableSort,
   disableResize,
   dataKey,
   sortBy,
+  width,
+  columnIndex,
   sortDirection,
   isPlaceholder,
   isDragging,
@@ -96,14 +98,13 @@ const TableHeaderCell: React.FC<TableHeaderCellProps> = ({
   const dispatch = useDispatch();
 
   const classes = useStyles();
-  const { headerHeight, columns } = useSelector(selector, shallowEqual);
-  const columnWidth = useMemo(() => columns[columnIndex].width, [columns, columnIndex]);
+  const { headerHeight } = useSelector(selector, shallowEqual);
   const resizeColumn = useCallback((deltaX: number) => {
     dispatch(tableActions.setColumnWidth({
       dataKey,
-      width: Math.max(columnWidth + deltaX, 52),
+      width: Math.max(width + deltaX, 52),
     }));
-  }, [columnWidth, dataKey, dispatch]);
+  }, [width, dataKey, dispatch]);
 
   const handleContextMenu = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (!onRightClick) {
@@ -136,7 +137,7 @@ const TableHeaderCell: React.FC<TableHeaderCellProps> = ({
         {...tableCellProps}
         style={{
           height: headerHeight,
-          width: columnWidth,
+          width,
         }}
       >
         {label}
@@ -164,7 +165,7 @@ const TableHeaderCell: React.FC<TableHeaderCellProps> = ({
             {...draggableContext.dragHandleProps}
             style={{
               ...draggableContext.draggableProps.style,
-              width: columnWidth,
+              width,
             }}
           >
             {label}

@@ -196,7 +196,7 @@ const selector = ({
   columns: columns.map((column) => ({
     ...column,
     ...COLUMNS[column.dataKey],
-  })),
+  })).filter(({ isSelected }) => !!isSelected),
   sortBy,
   sortDirection,
   rowHeight,
@@ -306,10 +306,11 @@ const Table: React.FC = () => {
     }
 
     dispatch(tableActions.setColumnOrder({
-      source: result.source.index,
-      destination: result.destination.index,
+      source: columns[result.source.index].dataKey,
+      destination: columns[result.destination.index].dataKey,
+      isReplace: true,
     }));
-  }, [dispatch]);
+  }, [dispatch, columns]);
 
   const handleCloseContextMenu = useCallback(() => {
     setContextAnchor((state) => ({ ...state, ...initialContextAnchor }));
@@ -406,7 +407,7 @@ const Table: React.FC = () => {
       window.bridge.ipc.send(getType(musicActions.openFinder), contextAnchor.row.path);
       handleCloseContextMenu();
     }
-  }, [contextAnchor]);
+  }, [handleCloseContextMenu, contextAnchor]);
 
   return (
     <>

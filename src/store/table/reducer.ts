@@ -25,8 +25,14 @@ const tableReducer = createReducer(initialState)
   })
   .handleAction(tableActions.setColumnOrder, (state, action) => {
     const columns = [...state.columns];
-    const [removed] = columns.splice(action.payload.source, 1);
-    columns.splice(action.payload.destination, 0, removed);
+    const source = columns.findIndex(({ dataKey }) => dataKey === action.payload.source);
+    const destination = columns.findIndex(({ dataKey }) => dataKey === action.payload.destination);
+    if (action.payload.isReplace) {
+      [columns[source], columns[destination]] = [columns[destination], columns[source]];
+    } else {
+      const [removed] = columns.splice(source, 1);
+      columns.splice(destination, 0, removed);
+    }
     return {
       ...state,
       columns,
@@ -36,15 +42,20 @@ const tableReducer = createReducer(initialState)
     ...state,
     ...action.payload,
   }))
-  .handleAction(tableActions.removeColumn, (state, action) => {
-    const columns = [...state.columns];
-    const index = state.columns.findIndex(({ dataKey }) => dataKey === action.payload);
-    columns.splice(index, 1);
-    return {
-      ...state,
-      columns,
-    };
-  })
+  .handleAction(tableActions.removeColumn, (state, action) => ({
+    ...state,
+    columns: state.columns.map((column) => (column.dataKey === action.payload ? ({
+      ...column,
+      isSelected: false,
+    }) : column)),
+  }))
+  .handleAction(tableActions.addColumn, (state, action) => ({
+    ...state,
+    columns: state.columns.map((column) => (column.dataKey === action.payload ? ({
+      ...column,
+      isSelected: true,
+    }) : column)),
+  }))
   .handleAction(tableActions.setColumns, (state, action) => ({
     ...state,
     columns: action.payload,

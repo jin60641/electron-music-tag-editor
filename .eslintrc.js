@@ -74,6 +74,7 @@ module.exports = {
         paths: [path.resolve(__dirname, 'src')],
       },
     },
+    'import/core-modules': ['electron'],
   },
   plugins: [
     'react',
