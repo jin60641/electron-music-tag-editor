@@ -8,6 +8,7 @@ export interface LayoutState {
 export enum PreferenceState {
   columns = 'columns',
   theme = 'theme',
+  language = 'language',
 }
 
 export enum Actions {

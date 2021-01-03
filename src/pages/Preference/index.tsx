@@ -12,6 +12,7 @@ import { PreferenceState } from 'store/layout/types';
 import { RootState } from 'store/types';
 
 import Columns from './Columns';
+import Language from './Language';
 import Theme from './Theme';
 
 const useStyles = makeStyles((theme) => ({
@@ -43,10 +44,7 @@ const useStyles = makeStyles((theme) => ({
     fontSize: 23,
     fontWeight: 'bold',
   },
-  close: {
-    fontSize: 20,
-    // asdf
-  },
+  close: { fontSize: 20 },
   body: {
     flexDirection: 'row',
     display: 'flex',
@@ -70,7 +68,7 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: 'flex-start',
     padding: '4px 10px 4px 10px',
     transition: 'none',
-    marginBottom: 3,
+    marginBottom: 4,
     boxShadow: 'none !important',
   },
   selectedMenuItem: { '&:hover': { backgroundColor: theme.palette.primary.main } },
@@ -83,6 +81,7 @@ const Map: {
 } = {
   [PreferenceState.columns]: Columns,
   [PreferenceState.theme]: Theme,
+  [PreferenceState.language]: Language,
 };
 
 const Preference: React.FC = () => {
