@@ -2,7 +2,6 @@ import React, {
   FC,
   useCallback,
   useEffect,
-  useMemo,
   useState,
 } from 'react';
 
@@ -10,17 +9,16 @@ import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
+import { useDispatch, useSelector } from 'react-redux';
 import { getType } from 'typesafe-actions';
 
+import layoutActions from 'store/layout/actions';
+import { AlertType } from 'store/layout/types';
 import actions from 'store/music/actions';
-import { Music } from 'store/music/types';
+import { InputPicture } from 'store/music/types';
+import { RootState } from 'store/types';
+import { getImageSize, Size } from 'utils/image';
 import { readFileSync } from 'utils/music';
-
-interface Props {
-  list: Music[],
-  ids: string,
-  setValue: (value?: string) => void,
-}
 
 const useStyles = makeStyles((theme) => ({
   wrap: {
@@ -58,57 +56,49 @@ const useStyles = makeStyles((theme) => ({
     '0%': { backgroundPosition: '0 0, 100% 100%, 0 100%, 100% 0' },
     '100%': { backgroundPosition: '100% 0, 0 100%, 0 0, 100% 100%' },
   },
+  size: { height: 0 },
   dragging: { display: 'block' },
 }));
 
-interface Size {
-  width: number,
-  height: number,
-}
-
-const getUrlFromFile = async (file: File) => new Promise<string>((resolve) => {
-  const reader = new FileReader();
-  reader.onload = () => {
-    resolve(`${reader.result}`);
-  };
-  reader.readAsDataURL(file);
-});
-
-const checkImageSize = async (src: string) => new Promise<Size | null>((resolve) => {
-  const image = new Image();
-  image.onload = () => {
-    const { width, height } = image;
-    resolve({ width, height });
-  };
-  image.onerror = () => {
-    resolve(null);
-  };
-  image.src = src;
-});
-
-const initialSize = { width: 0, height: 0 };
+const initialSize: Size = { width: 0, height: 0 };
 
 interface ContextAnchor {
   mouseX: null | number,
   mouseY: null | number,
 }
 
+const selector = ({
+  music: {
+    input: {
+      picture,
+      values: {
+        artist: { value: artist },
+        album: { value: album },
+      },
+    },
+  },
+}: RootState) => ({
+  value: picture,
+  releaseTitle: (artist && album) ? `${artist} - ${album}` : undefined,
+});
+
 const initialContextAnchor: ContextAnchor = {
   mouseX: null,
   mouseY: null,
 };
 
-const ImageInput: FC<Props> = ({
-  setValue,
-  ids,
-  list,
-}) => {
-  const [init, setInit] = useState(false);
+const ImageInput: FC = () => {
+  const { releaseTitle, value } = useSelector(selector);
+  const dispatch = useDispatch();
   const [contextAnchor, setContextAnchor] = React.useState<ContextAnchor>(initialContextAnchor);
   const [imgUrl, setImgUrl] = useState<string | undefined>(undefined);
   const [size, setSize] = useState({ ...initialSize });
   const [isFileDragging, setIsFileDragging] = useState(false);
   const classes = useStyles();
+
+  const setValue = useCallback((nextValue: InputPicture) => {
+    dispatch(actions.setInputPicture(nextValue));
+  }, [dispatch]);
 
   const handleChangeUrl = useCallback(async ({
     url,
@@ -126,7 +116,7 @@ const ImageInput: FC<Props> = ({
       setSize({ ...initialSize });
       return;
     }
-    const nextSize = await checkImageSize(url);
+    const nextSize = await getImageSize(url);
     if (!nextSize) {
       return;
     }
@@ -139,7 +129,7 @@ const ImageInput: FC<Props> = ({
     } else if (isExternal) {
       setValue(url);
     } else {
-      setValue(undefined);
+      // setValue(undefined);
     }
   }, [setValue]);
 
@@ -163,7 +153,7 @@ const ImageInput: FC<Props> = ({
     if (e.dataTransfer.files?.length) {
       const [file] = e.dataTransfer.files;
       (async () => {
-        url = await getUrlFromFile(file);
+        url = await readFileSync(file);
         if (url) {
           handleChangeUrl({ url, file });
         }
@@ -181,33 +171,13 @@ const ImageInput: FC<Props> = ({
       return;
     }
 
-    const url = await getUrlFromFile(file);
+    const url = await readFileSync(file);
     if (url) {
       handleChangeUrl({ url, file });
     }
     e.target.value = '';
     e.target.files = null;
   }, [handleChangeUrl]);
-
-  const defaultValue = useMemo(() => {
-    if (!ids || list.length !== 1) {
-      return undefined;
-    }
-    return list[0].metadata.picture;
-  }, [list, ids]);
-
-  useEffect(() => {
-    if (!init && !!ids && list.length === 1 && list[0].metadata && !list[0].metadata.picture?.[0]) {
-      window.bridge.ipc.send(getType(actions.addMusic.request), list[0].path);
-      setInit(true);
-    }
-  }, [list, ids, init]);
-
-  useEffect(() => {
-    if (ids) {
-      setInit(false);
-    }
-  }, [ids]);
 
   const handlePictureRightClick = (e: React.MouseEvent<HTMLLabelElement>) => {
     e.preventDefault();
@@ -220,6 +190,18 @@ const ImageInput: FC<Props> = ({
   const handleClose = useCallback(() => {
     setContextAnchor({ ...initialContextAnchor });
   }, []);
+
+  const handleSearchMusic = useCallback(() => {
+    if (!releaseTitle) {
+      dispatch(layoutActions.makeAlert({
+        type: AlertType.error,
+        message: 'Please enter artist and album fields',
+      }));
+      return;
+    }
+    window.bridge.ipc.send(getType(actions.searchMusic.request), releaseTitle);
+    handleClose();
+  }, [releaseTitle, handleClose, dispatch]);
 
   const handleDelete = useCallback(() => {
     setValue('');
@@ -245,11 +227,14 @@ const ImageInput: FC<Props> = ({
   }, [handleClose, handleChangeUrl]);
 
   useEffect(() => {
-    if (!(defaultValue instanceof Uint8Array)) {
-      setImgUrl((n) => (n === defaultValue ? n : undefined));
-      handleChangeUrl({ url: defaultValue });
+    if (!((value as any) instanceof Uint8Array)) {
+      handleChangeUrl({ url: value, isExternal: `${value}`.startsWith('http') });
     }
-  }, [defaultValue, handleChangeUrl]);
+  }, [value, handleChangeUrl]);
+
+  useEffect(() => {
+    dispatch(actions.updateInput());
+  }, [dispatch]);
 
   return (
     <>
@@ -281,18 +266,10 @@ const ImageInput: FC<Props> = ({
             )}
           />
         </label>
-        {imgUrl === undefined && (
-          <div>
-            (유지)
-          </div>
-        )}
-        {imgUrl && (
-          <div>
-            {size.width}
-            x
-            {size.height}
-          </div>
-        )}
+        <div className={classes.size}>
+          {imgUrl === undefined && '(유지)'}
+          {imgUrl && `${size.width}x${size.height}`}
+        </div>
       </div>
       <Menu
         keepMounted
@@ -320,6 +297,7 @@ const ImageInput: FC<Props> = ({
         {!!imgUrl && (
           <MenuItem onClick={handleDelete}>제거</MenuItem>
         )}
+        <MenuItem onClick={handleSearchMusic}>검색</MenuItem>
       </Menu>
     </>
   );

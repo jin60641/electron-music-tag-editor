@@ -1,6 +1,4 @@
-import React, {
-  useCallback, useEffect, useMemo, useState,
-} from 'react';
+import React, { useCallback } from 'react';
 
 import Button from '@material-ui/core/Button';
 import Divider from '@material-ui/core/Divider';
@@ -18,11 +16,11 @@ import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import layoutActions from 'store/layout/actions';
 import { drawerWidth } from 'store/layout/types';
 import musicActions from 'store/music/actions';
+import { FieldKeys, Option } from 'store/music/types';
 import { RootState } from 'store/types';
 
 import ImageField from './ImageField';
 import TextField from './TextField';
-import { FieldKeys, Option } from './types';
 
 const useStyles = makeStyles((theme) => ({
   drawer: {
@@ -59,11 +57,21 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const selector = ({
-  music: { list },
+  music: {
+    list,
+    input: {
+      values,
+      options,
+      picture,
+    },
+  },
   layout: { drawer: isOpen },
 }: RootState) => ({
   list: list.filter(({ isSelected }) => isSelected),
   isOpen,
+  values,
+  options,
+  picture,
 });
 
 const FIELDS: { key: FieldKeys, label: string }[] = [{
@@ -95,53 +103,11 @@ const FIELDS: { key: FieldKeys, label: string }[] = [{
   label: '디스크',
 }];
 
-type Values = {
-  [key in FieldKeys]: Option;
-};
-
-type Options = {
-  [key in FieldKeys]: Option[];
-};
-
-const defaultOption = { label: '(유지)', value: undefined };
-
-const initialValues: Values = {
-  title: defaultOption,
-  artist: defaultOption,
-  album: defaultOption,
-  comment: defaultOption,
-  albumartist: defaultOption,
-  genre: defaultOption,
-  composer: defaultOption,
-  track: defaultOption,
-  disk: defaultOption,
-};
-
-const initialOptions: Options = {
-  title: [],
-  artist: [],
-  album: [],
-  comment: [],
-  albumartist: [],
-  genre: [],
-  composer: [],
-  track: [],
-  disk: [],
-};
-
 const Drawer: React.FC = () => {
   const dispatch = useDispatch();
-  const { list, isOpen } = useSelector(selector, shallowEqual);
-  const [values, setValues] = useState<Values>(initialValues);
-  const [options, setOptions] = useState<Options>(initialOptions);
-  const [picture, setPicture] = useState<string | undefined>(undefined);
+  const { list, isOpen, values, options, picture } = useSelector(selector, shallowEqual);
   const classes = useStyles();
   const theme = useTheme();
-  const ids = useMemo(() => list.map(({ path }) => path).join(','), [list]);
-
-  const handleDrawerOpen = useCallback(() => {
-    dispatch(layoutActions.setDrawer(true));
-  }, [dispatch]);
 
   const handleDrawerClose = useCallback(() => {
     dispatch(layoutActions.setDrawer(false));
@@ -151,39 +117,11 @@ const Drawer: React.FC = () => {
     name: FieldKeys,
     value: Option,
   ) => {
-    setValues((v) => ({
-      ...v,
+    dispatch(musicActions.setInputValues({
+      ...values,
       [name]: value,
     }));
-  }, []);
-
-  useEffect(() => {
-    if (ids) {
-      const nextOptions: Options = {} as Options;
-      const nextValues: Values = {} as Values;
-      Object.keys(initialOptions).forEach((key) => {
-        const nextOption = list
-          .reduce((arr, { metadata: { [key as FieldKeys]: data } }) => ((!arr.find((item) => item.value === `${data}`))
-            ? arr.concat({ value: data, label: `${data}` })
-            : arr
-          ), [] as Option[]);
-        nextValues[key as FieldKeys] = nextOption.length === 1 && nextOption[0].value
-          ? nextOption[0]
-          : defaultOption;
-        nextOptions[key as FieldKeys] = nextOption.filter(({ value }) => !!value);
-      });
-      setOptions(nextOptions);
-      setValues(nextValues);
-    }
-  }, [ids, list]);
-
-  useEffect(() => {
-    if (ids.length) {
-      handleDrawerOpen();
-    } else {
-      handleDrawerClose();
-    }
-  }, [handleDrawerClose, handleDrawerOpen, ids]);
+  }, [dispatch, values]);
 
   const handleClickSave = useCallback(() => {
     const filePaths = list.map(({ path }) => path);
@@ -229,11 +167,7 @@ const Drawer: React.FC = () => {
             </ListItem>
           ))}
           <ListItem>
-            <ImageField
-              ids={ids}
-              setValue={setPicture}
-              list={list}
-            />
+            <ImageField />
           </ListItem>
         </List>
         <List>

@@ -29,9 +29,12 @@ export const channels = [
   musicActions.resetMusic,
   musicActions.removeMusic,
   musicActions.setCount,
-  musicActions.addMusic.request,
-  musicActions.updateMusic.request,
+  musicActions.addMusics.request,
+  musicActions.updateMusics.request,
+  musicActions.searchMusic.success,
+  musicActions.searchMusic.failure,
   layoutActions.setPreference,
+  layoutActions.makeAlert,
 ];
 
 export type Epic = RxEpic<

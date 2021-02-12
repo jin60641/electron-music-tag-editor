@@ -1,6 +1,6 @@
 "use strict";
 exports.__esModule = true;
-exports.openPreference = exports.saveMusic = exports.addMusic = exports.removeMusic = exports.setCount = exports.resetMusic = void 0;
+exports.openPreference = exports.saveMusics = exports.addMusics = exports.searchMusic = exports.removeMusics = exports.setCount = exports.resetMusic = void 0;
 var fs = require("fs");
 var NodeID3 = require("node-id3");
 var resetMusic = function (win) {
@@ -11,30 +11,57 @@ var setCount = function (win, count) {
     win.webContents.send('MUSIC.SET_COUNT', count);
 };
 exports.setCount = setCount;
-var removeMusic = function (win, filePath) {
-    win.webContents.send('MUSIC.REMOVE_MUSIC', ({ filePaths: [filePath] }));
+var removeMusics = function (win, filePaths) {
+    win.webContents.send('MUSIC.REMOVE_MUSICS', ({ filePaths: filePaths }));
 };
-exports.removeMusic = removeMusic;
-var addMusic = function (win, filePath) {
-    if (!fs.existsSync(filePath)) {
-        return exports.removeMusic(win, filePath);
+exports.removeMusics = removeMusics;
+var searchMusic = function (win, result) {
+    if (result.length) {
+        win.webContents.send('MUSIC.SEARCH_MUSIC#SUCCESS', result);
     }
-    win.webContents.send('MUSIC.ADD_MUSIC', ({
-        metadata: NodeID3.read(filePath, { noRaw: true }),
-        path: filePath
-    }));
-};
-exports.addMusic = addMusic;
-var saveMusic = function (win, filePath) {
-    if (!fs.existsSync(filePath)) {
-        return exports.removeMusic(win, filePath);
+    else {
+        win.webContents.send('MUSIC.SEARCH_MUSIC#FAILURE');
     }
-    win.webContents.send('MUSIC.UPDATE_MUSIC', ({
-        metadata: NodeID3.read(filePath, { noRaw: true }),
-        path: filePath
-    }));
 };
-exports.saveMusic = saveMusic;
+exports.searchMusic = searchMusic;
+var addMusics = function (win, filePaths) {
+    var removedPaths = [];
+    var musics = filePaths.reduce(function (arr, filePath) {
+        var isExist = fs.existsSync(filePath);
+        if (!isExist) {
+            removedPaths.push(filePath);
+            return arr;
+        }
+        return arr.concat([{
+                metadata: NodeID3.read(filePath, { noRaw: true }),
+                path: filePath
+            }]);
+    }, []);
+    exports.removeMusics(win, removedPaths);
+    if (musics.length) {
+        win.webContents.send('MUSIC.ADD_MUSICS', musics);
+    }
+};
+exports.addMusics = addMusics;
+var saveMusics = function (win, filePaths) {
+    var removedPaths = [];
+    var musics = filePaths.reduce(function (arr, filePath) {
+        var isExist = fs.existsSync(filePath);
+        if (!isExist) {
+            removedPaths.push(filePath);
+            return arr;
+        }
+        return arr.concat([{
+                metadata: NodeID3.read(filePath, { noRaw: true }),
+                path: filePath
+            }]);
+    }, []);
+    exports.removeMusics(win, removedPaths);
+    if (musics.length) {
+        win.webContents.send('MUSIC.UPDATE_MUSIC', musics);
+    }
+};
+exports.saveMusics = saveMusics;
 var openPreference = function (win) {
     win.webContents.send('LAYOUT.SET_PREFERENCE', '');
 };

@@ -1,12 +1,12 @@
 import { Music, OpenMusicRequestPayload } from 'store/music/types';
 
-export const readFileSync = (blob: Blob) => new Promise<string>((resolve, reject) => {
+export const readFileSync = (file: Blob | File) => new Promise<string>((resolve, reject) => {
   const reader = new FileReader();
   reader.onload = () => {
     resolve(reader.result as string);
   };
   reader.onerror = reject;
-  reader.readAsDataURL(blob);
+  reader.readAsDataURL(file);
 });
 
 export const bufferToMusic: (payload: OpenMusicRequestPayload) => Promise<Music> = async ({
@@ -33,3 +33,6 @@ export const bufferToMusic: (payload: OpenMusicRequestPayload) => Promise<Music>
       : undefined,
   },
 });
+
+// eslint-disable-next-line
+export const bufferToMusics: (payload: OpenMusicRequestPayload[]) => Promise<Music[]> = async (arr) => await Promise.all(arr.map(bufferToMusic));

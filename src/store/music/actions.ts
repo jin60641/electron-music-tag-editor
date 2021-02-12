@@ -2,12 +2,17 @@ import { createAction, createAsyncAction } from 'typesafe-actions';
 
 import {
   Actions,
-  AddMusicRequestPayload,
+  AddMusicsRequestPayload,
+  InputOptions,
+  InputPicture,
+  InputValues,
   Music,
   OpenMusicRequestPayload,
   RemoveMusicPayload,
   SaveMusicPayload,
-  UpdateMusicRequestPayload,
+  SearchMusicRequestPayload,
+  SearchMusicSuccessPayload,
+  UpdateMusicsRequestPayload,
 } from './types';
 
 const setCount = createAction(Actions.SET_COUNT)<number>();
@@ -60,13 +65,13 @@ Music,
 undefined
 >();
 
-const addMusic = createAsyncAction(
-  Actions.ADD_MUSIC_REQUEST,
-  Actions.ADD_MUSIC_SUCCESS,
-  Actions.ADD_MUSIC_FAILURE,
+const addMusics = createAsyncAction(
+  Actions.ADD_MUSICS_REQUEST,
+  Actions.ADD_MUSICS_SUCCESS,
+  Actions.ADD_MUSICS_FAILURE,
 )<
-AddMusicRequestPayload,
-Music,
+AddMusicsRequestPayload,
+Music[],
 undefined
 >();
 
@@ -74,13 +79,13 @@ const saveMusic = createAction(
   Actions.SAVE_MUSIC_REQUEST,
 )<SaveMusicPayload>();
 
-const updateMusic = createAsyncAction(
-  Actions.UPDATE_MUSIC_REQUEST,
-  Actions.UPDATE_MUSIC_SUCCESS,
-  Actions.UPDATE_MUSIC_FAILURE,
+const updateMusics = createAsyncAction(
+  Actions.UPDATE_MUSICS_REQUEST,
+  Actions.UPDATE_MUSICS_SUCCESS,
+  Actions.UPDATE_MUSICS_FAILURE,
 )<
-UpdateMusicRequestPayload,
-Music,
+UpdateMusicsRequestPayload,
+Music[],
 undefined
 >();
 
@@ -88,18 +93,40 @@ const openFinder = createAction(
   Actions.OPEN_FINDER,
 )<string>();
 
+const searchMusic = createAsyncAction(
+  Actions.SEARCH_MUSIC_REQUEST,
+  Actions.SEARCH_MUSIC_SUCCESS,
+  Actions.SEARCH_MUSIC_FAILURE,
+)<
+SearchMusicRequestPayload,
+SearchMusicSuccessPayload,
+void
+>();
+
+const updateInput = createAction(Actions.UPDATE_INPUT)();
+const setInputOptions = createAction(Actions.SET_INPUT_OPTIONS)<InputOptions>();
+const setInputValues = createAction(Actions.SET_INPUT_VALUES)<InputValues>();
+const setInputPicture = createAction(Actions.SET_INPUT_PICTURE)<InputPicture>();
+const resetSearch = createAction(Actions.RESET_SEARCH)();
+
 export default {
   openMusic,
-  addMusic,
+  addMusics,
   resetMusic,
   selectMusic,
   selectMusicAll,
   saveMusic,
-  updateMusic,
+  updateMusics,
   selectMusicAdd,
   selectMusicMulti,
+  searchMusic,
   setCount,
   removeMusic,
   setLastSelected,
   openFinder,
+  setInputOptions,
+  setInputValues,
+  setInputPicture,
+  updateInput,
+  resetSearch,
 };

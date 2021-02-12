@@ -35,7 +35,7 @@ const direction: {
   [SortDirection.DESC]: 'desc',
 };
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
   isDragging: { overflow: 'initial' },
   resizeHandle: {
     width: 18,
@@ -52,7 +52,7 @@ const useStyles = makeStyles({
   },
   tableRow: {
     minWidth: '100vw',
-    borderBottom: '1px solid rgba(224, 224, 224, 1)',
+    borderBottom: `1px solid ${theme.palette.grey[200]}`,
     cursor: 'pointer',
   },
   tableCell: {
@@ -69,7 +69,7 @@ const useStyles = makeStyles({
   },
   resizableHeader: { paddingRight: 28 },
   placeholder: {},
-});
+}));
 
 const selector = ({
   table: {

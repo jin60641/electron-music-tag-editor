@@ -2,7 +2,16 @@ import { createTransform, persistReducer } from 'redux-persist';
 import { createReducer } from 'typesafe-actions';
 
 import musicActions from './actions';
-import { initialState, MusicState } from './types';
+import {
+  defaultOption,
+  FieldKeys,
+  initialInputOptions,
+  initialState,
+  InputOptions,
+  InputValues,
+  MusicState,
+  Option,
+} from './types';
 
 const transform = createTransform((state: MusicState['list'], key) => (key === 'list' ? state.map(({
   metadata: {
@@ -18,6 +27,7 @@ const transform = createTransform((state: MusicState['list'], key) => (key === '
 const persistConfig = {
   key: 'music',
   storage: window.bridge.storage,
+  blacklist: ['input'],
   transforms: [transform],
 };
 
@@ -27,6 +37,31 @@ const musicReducer = createReducer<MusicState>(initialState)
     count: 0,
     list: [],
   }))
+  .handleAction(musicActions.updateInput, (state) => {
+    const nextOptions: InputOptions = {} as InputOptions;
+    const nextValues: InputValues = {} as InputValues;
+    const list = state.list.filter(({ isSelected }) => !!isSelected);
+    Object.keys(initialInputOptions).forEach((key) => {
+      const nextOption = list
+        .reduce((arr, { metadata: { [key as FieldKeys]: data } }) => ((!arr.find((item) => item.value === `${data}`))
+          ? arr.concat({ value: data, label: `${data}` })
+          : arr
+        ), [] as Option[]);
+      nextValues[key as FieldKeys] = nextOption.length === 1 && nextOption[0].value
+        ? nextOption[0]
+        : defaultOption;
+      nextOptions[key as FieldKeys] = nextOption.filter(({ value }) => !!value);
+    });
+    const nextPicture = (list.length !== 1) ? undefined : list[0].metadata.picture;
+    return {
+      ...state,
+      input: {
+        values: nextValues,
+        options: nextOptions,
+        picture: nextPicture as string,
+      },
+    };
+  })
   .handleAction(musicActions.setLastSelected, (state, action) => ({
     ...state,
     lastSelected: action.payload,
@@ -35,6 +70,14 @@ const musicReducer = createReducer<MusicState>(initialState)
     ...state,
     count: state.count + action.payload,
     lastCount: state.list.length,
+  }))
+  .handleAction(musicActions.resetSearch, (state) => ({
+    ...state,
+    search: [],
+  }))
+  .handleAction(musicActions.searchMusic.success, (state, action) => ({
+    ...state,
+    search: action.payload,
   }))
   .handleAction(musicActions.selectMusic, (state, action) => ({
     ...state,
@@ -114,30 +157,55 @@ const musicReducer = createReducer<MusicState>(initialState)
       },
     }) : item)),
   }))
-  .handleAction(musicActions.updateMusic.success, (state, action) => {
+  .handleAction(musicActions.updateMusics.success, (state, action) => {
     const list = [...state.list];
-    const index = state.list.findIndex(({ path }) => path === action.payload.path);
-    list[index] = { ...action.payload, isSelected: list[index].isSelected };
+    action.payload.forEach((music) => {
+      const index = state.list.findIndex(({ path }) => path === music.path);
+      list[index] = { ...music, isSelected: list[index].isSelected };
+    });
     return {
       ...state,
       list,
       count: state.count + 1,
     };
   })
-  .handleAction(musicActions.addMusic.success, (state, action) => {
+  .handleAction(musicActions.setInputValues, (state, action) => ({
+    ...state,
+    input: {
+      ...state.input,
+      values: action.payload,
+    },
+  }))
+  .handleAction(musicActions.setInputOptions, (state, action) => ({
+    ...state,
+    input: {
+      ...state.input,
+      options: action.payload,
+    },
+  }))
+  .handleAction(musicActions.setInputPicture, (state, action) => ({
+    ...state,
+    input: {
+      ...state.input,
+      picture: action.payload,
+    },
+  }))
+  .handleAction(musicActions.addMusics.success, (state, action) => {
     const list = [...state.list];
-    const index = state.list.findIndex(({ path }) => path === action.payload.path);
-    if (index >= 0) {
-      list[index] = { ...action.payload, isSelected: list[index].isSelected };
-      return {
-        ...state,
-        list,
-        count: state.count - 1,
-      };
-    }
+    let { count } = state;
+    action.payload.forEach((music) => {
+      const index = state.list.findIndex(({ path }) => path === music.path);
+      if (index >= 0) {
+        list[index] = { ...music, isSelected: list[index].isSelected };
+        count -= 1;
+      } else {
+        list.push(music);
+      }
+    });
     return {
       ...state,
-      list: list.concat(action.payload),
+      list,
+      count,
     };
   });
 

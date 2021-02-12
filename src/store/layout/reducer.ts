@@ -8,6 +8,10 @@ const layoutReducer = createReducer<LayoutState>(initialState)
     ...state,
     drawer: action.payload,
   }))
+  .handleAction(layoutActions.setPalette, (state, action) => ({
+    ...state,
+    palette: action.payload,
+  }))
   .handleAction(layoutActions.setPreference, (state, action) => {
     let { preference } = state;
     if (action.payload === undefined || action.payload.length) {
