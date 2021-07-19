@@ -59,6 +59,7 @@ const musicReducer = createReducer<MusicState>(initialState)
         values: nextValues,
         options: nextOptions,
         picture: nextPicture as string,
+        isPictureChanged: false,
       },
     };
   })
@@ -188,6 +189,7 @@ const musicReducer = createReducer<MusicState>(initialState)
     input: {
       ...state.input,
       picture: action.payload,
+      isPictureChanged: true,
     },
   }))
   .handleAction(musicActions.addMusics.success, (state, action) => {

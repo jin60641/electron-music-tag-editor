@@ -86,6 +86,7 @@ export const initialState: MusicState = {
     values: initialInputValues,
     options: initialInputOptions,
     picture: initialInputPicture,
+    isPictureChanged: false,
   },
 };
 
@@ -153,6 +154,7 @@ export interface InputState {
   values: InputValues,
   options: InputOptions,
   picture: InputPicture,
+  isPictureChanged: boolean,
 }
 
 export type InputPicture = string | undefined;

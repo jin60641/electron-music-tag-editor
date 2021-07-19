@@ -63,12 +63,14 @@ const selector = ({
       values,
       options,
       picture,
+      isPictureChanged,
     },
   },
   layout: { drawer: isOpen },
 }: RootState) => ({
   list: list.filter(({ isSelected }) => isSelected),
   isOpen,
+  isPictureChanged,
   values,
   options,
   picture,
@@ -105,7 +107,14 @@ const FIELDS: { key: FieldKeys, label: string }[] = [{
 
 const Drawer: React.FC = () => {
   const dispatch = useDispatch();
-  const { list, isOpen, values, options, picture } = useSelector(selector, shallowEqual);
+  const {
+    list,
+    isOpen,
+    values,
+    options,
+    picture,
+    isPictureChanged,
+  } = useSelector(selector, shallowEqual);
   const classes = useStyles();
   const theme = useTheme();
 
@@ -129,12 +138,12 @@ const Drawer: React.FC = () => {
       (!!option && option.value !== undefined) ? ({
         ...obj,
         [key]: option.value,
-      }) : obj), picture === undefined ? {} : { picture });
+      }) : obj), (picture === undefined || !isPictureChanged) ? {} : { picture });
     dispatch(musicActions.saveMusic({
       filePaths,
       metadata,
     }));
-  }, [list, picture, values, dispatch]);
+  }, [list, picture, values, dispatch, isPictureChanged]);
 
   return (
     <MuiDrawer
