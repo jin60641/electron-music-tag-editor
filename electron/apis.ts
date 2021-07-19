@@ -56,7 +56,7 @@ export const saveMusics = (win: BrowserWindow, filePaths: string[]) => {
   }, []);
   removeMusics(win, removedPaths);
   if (musics.length) {
-    win.webContents.send('MUSIC.UPDATE_MUSIC', musics);
+    win.webContents.send('MUSIC.UPDATE_MUSICS', musics);
   }
 };
 

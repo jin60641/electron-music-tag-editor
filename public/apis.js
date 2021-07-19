@@ -58,7 +58,7 @@ var saveMusics = function (win, filePaths) {
     }, []);
     exports.removeMusics(win, removedPaths);
     if (musics.length) {
-        win.webContents.send('MUSIC.UPDATE_MUSIC', musics);
+        win.webContents.send('MUSIC.UPDATE_MUSICS', musics);
     }
 };
 exports.saveMusics = saveMusics;
