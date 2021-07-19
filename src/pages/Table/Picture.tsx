@@ -27,11 +27,11 @@ interface Props {
 const Picture: React.FC<Props> = ({ rowData }) => {
   const picture = useMemo(() => rowData?.metadata?.picture, [rowData]);
   const classes = useStyles();
-
+  const url = useMemo(() => (typeof picture === 'string' ? picture : fallbackImg), [picture]);
   return (
     <div
       className={classes.root}
-      style={{ backgroundImage: `url('${picture || fallbackImg}')` }}
+      style={{ backgroundImage: `url('${url}')` }}
     />
   );
 };
