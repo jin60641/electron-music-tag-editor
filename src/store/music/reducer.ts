@@ -93,6 +93,9 @@ const musicReducer = createReducer<MusicState>(initialState)
     count: state.count - action.payload.filePaths.length,
     lastCount: state.lastCount - action.payload.filePaths.length,
     list: state.list.filter((item) => !action.payload.filePaths.includes(item.path)),
+    lastSelected: action.payload.filePaths.includes(state.list[state.lastSelected ?? -1]?.path)
+      ? undefined
+      : state.lastSelected,
   }))
   .handleAction(musicActions.selectMusicMulti, (state, action) => ({
     ...state,

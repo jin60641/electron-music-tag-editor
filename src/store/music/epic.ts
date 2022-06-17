@@ -34,6 +34,7 @@ const selectMusicEpic: Epic = (action$, state) => action$.pipe(
     actions.selectMusicMulti,
     actions.selectMusicAdd,
     actions.selectMusicAll,
+    actions.removeMusic,
     actions.addMusics.success,
     actions.updateMusics.success,
   ])),
