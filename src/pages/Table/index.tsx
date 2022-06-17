@@ -456,6 +456,22 @@ const Table: React.FC = () => {
                     <RVTable
                       className={classes.table}
                       height={height}
+                      overscanRowCount={50}
+                      overscanIndicesGetter={({
+                        cellCount,
+                        overscanCellsCount,
+                        startIndex,
+                        stopIndex,
+                      }) => ({
+                        overscanStartIndex: Math.max(
+                          0,
+                          startIndex - overscanCellsCount,
+                        ),
+                        overscanStopIndex: Math.min(
+                          cellCount - 1,
+                          stopIndex + overscanCellsCount,
+                        ),
+                      })}
                       width={width}
                       rowGetter={({ index }) => rows[index]}
                       {...tableProps}
