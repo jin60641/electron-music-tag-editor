@@ -31,5 +31,4 @@ yarn-error.log*
 
 # editor
 *.swp
-electron-builder.yml
 .eslintcache

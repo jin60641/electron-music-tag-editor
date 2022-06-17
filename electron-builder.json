@@ -1,0 +1,41 @@
+{
+  "appId": "com.jinsang.mp3tag",
+  "publish": {
+    "provider": "github",
+    "owner": "jin60641",
+    "repo": "electron-music-tag-editor"
+  },
+  "win": {
+    "fileAssociations": [
+      {
+        "ext": [
+          "mp3"
+        ],
+        "description": "Mp3 Files"
+      }
+    ]
+  },
+  "mac": {
+    "fileAssociations": [
+      {
+        "ext": [
+          "mp3"
+        ],
+        "role": "Editor"
+      }
+    ]
+  },
+  "linux": {
+    "fileAssociations": [
+      {
+        "ext": [
+          "mp3"
+        ],
+        "mimeType": "audio/mpeg"
+      }
+    ]
+  },
+  "directories": {
+    "buildResources": "./build/"
+  }
+}

@@ -38,9 +38,10 @@ app.on('window-all-closed', () => {
 app.on('before-quit', close);
 app.on('will-quit', close);
 
+const openFiles: string[] = [];
+let win: BrowserWindow;
 const createWindow = () => {
-  // Create the browser window.
-  const win = new BrowserWindow({
+  win = new BrowserWindow({
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: true,
@@ -114,6 +115,8 @@ const createWindow = () => {
           click: () => openPreference(win),
           accelerator: 'Command+,',
         },
+        { type: 'separator' },
+        { role: 'quit' },
       ],
     }] : []),
     // { role: 'fileMenu' }
@@ -304,6 +307,25 @@ const createWindow = () => {
     });
     saveMusics(win, filePaths);
   });
+
+  ipcMain.on('INIT', () => {
+    if (openFiles.length) {
+      setCount(win, openFiles.length);
+      addMusics(win, openFiles);
+    }
+  });
 };
+
+app.on('will-finish-launching', () => {
+  app.on('open-file', (event, file) => {
+    event.preventDefault();
+    if (win) {
+      setCount(win, 1);
+      addMusics(win, [file]);
+    } else {
+      openFiles.push(file);
+    }
+  });
+});
 
 app.whenReady().then(createWindow);

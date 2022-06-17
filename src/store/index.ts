@@ -41,6 +41,8 @@ channels.forEach((channel) => {
   });
 });
 
+window.bridge.ipc.send('INIT', undefined);
+
 export {
   store,
   persistor,
