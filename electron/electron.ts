@@ -9,7 +9,6 @@ import {
   shell,
 } from 'electron';
 import fetch from 'electron-fetch';
-import * as isDev from 'electron-is-dev';
 import * as fs from 'fs';
 import * as glob from 'glob';
 import * as NodeID3 from 'node-id3';
@@ -97,18 +96,13 @@ const createWindow = () => {
     });
   };
 
-  if (isDev) {
+  if (!app.isPackaged) {
     win.loadURL('http://localhost:3000');
     win.webContents.openDevTools();
   } else {
     win.loadFile(path.join(__dirname, '../build/index.html'));
   }
 
-  /*
-  if (process.env.NODE_ENV !== 'production') {
-    win.webContents.openDevTools()
-  }
-  */
   const template = [
     // { role: 'appMenu' }
     ...(isMac ? [{
