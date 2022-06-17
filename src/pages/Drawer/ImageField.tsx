@@ -229,6 +229,8 @@ const ImageInput: FC = () => {
   useEffect(() => {
     if (typeof value === 'string') {
       handleChangeUrl({ url: value, isExternal: `${value}`.startsWith('http') });
+    } else {
+      handleChangeUrl({});
     }
   }, [value, handleChangeUrl]);
 
