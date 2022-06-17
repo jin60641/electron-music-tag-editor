@@ -54,15 +54,12 @@
     "react:build": "react-app-rewired build",
     "react:test": "react-app-rewired test",
     "react:eject": "react-scripts eject",
-    "electron:build": "ELECTRON_IS_DEV=0 yarn tsc -p ./tsconfig.electron.json",
+    "electron:build": "yarn tsc -p ./tsconfig.electron.json",
     "electron:dev": "yarn tsc --watch -p ./tsconfig.electron.json",
     "electron": "nodemon --exec \"\"electron .\"\"",
     "start": "concurrently \"yarn electron:dev\" \"yarn react:start\" \"wait-on http://localhost:3000 && yarn electron\"",
     "build": "yarn react:build && yarn electron:build && electron-builder",
-    "react:lint": "eslint -c .eslintrc.js 'src/**/*.{ts,tsx}'",
-    "electron:lint": "TARGET=ELECTRON eslint -c .eslintrc.js 'electron/**/*.{ts,tsx}'",
-    "lint": "concurrently \"yarn react:lint\" \"yarn electron:lint\"",
-    "lint:fix": "concurrently \"yarn react:lint --fix\" \"yarn electron:lint --fix\""
+    "lint": "eslint -c .eslintrc.js '{src,electron}/**/*.{ts,tsx}'"
   },
   "main": "build/electron.js",
   "homepage": "./",

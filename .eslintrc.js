@@ -67,7 +67,7 @@ module.exports = {
     ecmaFeatures: {
       jsx: true,
     },
-    project: process.env.TARGET === 'ELECTRON' ? './tsconfig.electron.json' : './tsconfig.json',
+    project: [path.resolve(__dirname, './tsconfig.json'), path.resolve(__dirname, './electron/tsconfig.json')],
     ecmaVersion: 2020,
     sourceType: 'module',
   },
