@@ -399,6 +399,9 @@ const Table: React.FC = () => {
       dispatchRemoveMusics();
     } else if (e.key === ' ' && lastSelected !== undefined) {
       dispatch(musicActions.selectMusicAdd(lastSelected));
+    } else if (e.key === 'a' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      dispatch(musicActions.selectMusicAll(true));
     }
   }, [dispatch, lastSelected, rows, dispatchRemoveMusics]);
 
