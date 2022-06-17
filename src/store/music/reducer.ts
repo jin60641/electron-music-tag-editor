@@ -170,7 +170,7 @@ const musicReducer = createReducer<MusicState>(initialState)
     return {
       ...state,
       list,
-      count: state.count + 1,
+      count: state.count + action.payload.length,
     };
   })
   .handleAction(musicActions.setInputValues, (state, action) => ({
