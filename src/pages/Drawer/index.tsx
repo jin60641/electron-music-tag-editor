@@ -22,6 +22,8 @@ import { RootState } from 'store/types';
 import ImageField from './ImageField';
 import TextField from './TextField';
 
+const handleWidth = 0;
+
 const useStyles = makeStyles((theme) => ({
   drawer: {
     width: 0,
@@ -54,6 +56,18 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: 'space-between',
   },
   drawerShift: { width: drawerWidth },
+  handlePaper: {
+    width: handleWidth,
+    backgroundColor: 'transparent',
+    borderRight: '1px solid transparent',
+  },
+  handlePaperActive: {
+    overflow: 'visible',
+    transition: 'border-right .2s',
+    cursor: 'pointer',
+    '&:hover': { borderRight: `2px solid ${theme.palette.primary.main}` },
+  },
+  handleShift: { width: handleWidth },
 }));
 
 const selector = ({
@@ -145,54 +159,68 @@ const Drawer: React.FC = () => {
     }));
   }, [list, picture, values, dispatch, isPictureChanged]);
 
+  const handleClickOpen = () => {
+    dispatch(layoutActions.setDrawer(true));
+  };
+
   return (
-    <MuiDrawer
-      className={clsx(classes.drawer, isOpen && classes.drawerShift)}
-      variant='persistent'
-      anchor='left'
-      open={isOpen}
-      classes={{ paper: classes.drawerPaper }}
-    >
-      <div className={classes.drawerHeader}>
-        <Typography variant='h5'>
-          {!!list.length && `${list.length} selected`}
-        </Typography>
-        <IconButton onClick={handleDrawerClose}>
-          {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
-        </IconButton>
-      </div>
-      <Divider />
-      <div className={classes.drawerContent}>
-        <List className={classes.list}>
-          {FIELDS.map((field) => (
-            <ListItem key={`Drawer-ListItem-${field.key}`}>
-              <TextField
-                name={field.key}
-                label={field.label}
-                options={options[field.key]}
-                value={values[field.key]}
-                onChange={handleChangeText}
-              />
+    <>
+      <MuiDrawer
+        className={clsx(classes.drawer, !isOpen && classes.handleShift)}
+        variant='permanent'
+        anchor='left'
+        open={!isOpen}
+        classes={{ paper: clsx(classes.handlePaper, list.length && classes.handlePaperActive) }}
+        onClick={list.length ? handleClickOpen : undefined}
+      />
+      <MuiDrawer
+        className={clsx(classes.drawer, isOpen && classes.drawerShift)}
+        variant='persistent'
+        anchor='left'
+        open={isOpen}
+        classes={{ paper: classes.drawerPaper }}
+      >
+        <div className={classes.drawerHeader}>
+          <Typography variant='h5'>
+            {!!list.length && `${list.length} selected`}
+          </Typography>
+          <IconButton onClick={handleDrawerClose}>
+            {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+          </IconButton>
+        </div>
+        <Divider />
+        <div className={classes.drawerContent}>
+          <List className={classes.list}>
+            {FIELDS.map((field) => (
+              <ListItem key={`Drawer-ListItem-${field.key}`}>
+                <TextField
+                  name={field.key}
+                  label={field.label}
+                  options={options[field.key]}
+                  value={values[field.key]}
+                  onChange={handleChangeText}
+                />
+              </ListItem>
+            ))}
+            <ListItem>
+              <ImageField />
             </ListItem>
-          ))}
-          <ListItem>
-            <ImageField />
-          </ListItem>
-        </List>
-        <List>
-          <ListItem>
-            <Button
-              variant='contained'
-              color='primary'
-              fullWidth
-              onClick={handleClickSave}
-            >
-              Save
-            </Button>
-          </ListItem>
-        </List>
-      </div>
-    </MuiDrawer>
+          </List>
+          <List>
+            <ListItem>
+              <Button
+                variant='contained'
+                color='primary'
+                fullWidth
+                onClick={handleClickSave}
+              >
+                Save
+              </Button>
+            </ListItem>
+          </List>
+        </div>
+      </MuiDrawer>
+    </>
   );
 };
 
