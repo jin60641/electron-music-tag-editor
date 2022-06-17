@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "esnext",
-    "module": "esnext",
+    "module": "commonjs",
     "lib": [
       "dom",
       "dom.iterable",
@@ -15,18 +15,16 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "jsx": "react",
-    "sourceRoot": "./src",
-    "baseUrl": "./src",
+    "sourceRoot": "./electron",
     "allowJs": true,
     "skipLibCheck": true,
+    "baseUrl": ".",
     "isolatedModules": true,
-    "noEmit": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "outDir": "./build"
   },
   "include": [
-    "src"
-  ],
-  "exclude": [
-    "node_modules"
+    "electron"
   ]
 }
+  
