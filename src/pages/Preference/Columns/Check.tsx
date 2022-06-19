@@ -4,6 +4,7 @@ import MuiCheckbox from '@material-ui/core/Checkbox';
 import MuiFormControlLabel from '@material-ui/core/FormControlLabel';
 import { withStyles } from '@material-ui/core/styles';
 import { Draggable } from 'react-beautiful-dnd';
+import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 
 import actions from 'store/table/actions';
@@ -31,6 +32,7 @@ interface Props {
 }
 
 const Check: React.FC<Props> = ({ isChecked, id }) => {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const { checked, index } = useSelector(({ table: { columns } }: RootState) => ({
     checked: isChecked,
@@ -69,7 +71,7 @@ const Check: React.FC<Props> = ({ isChecked, id }) => {
                 onChange={handleChange}
               />
             )}
-            label={id}
+            label={t(id)}
           />
         </div>
       )}

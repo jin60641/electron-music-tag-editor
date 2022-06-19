@@ -9,6 +9,7 @@ import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
+import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { getType } from 'typesafe-actions';
 
@@ -88,6 +89,7 @@ const initialContextAnchor: ContextAnchor = {
 };
 
 const ImageInput: FC = () => {
+  const { t } = useTranslation();
   const { releaseTitle, value } = useSelector(selector);
   const dispatch = useDispatch();
   const [contextAnchor, setContextAnchor] = React.useState<ContextAnchor>(initialContextAnchor);
@@ -195,7 +197,7 @@ const ImageInput: FC = () => {
     if (!releaseTitle) {
       dispatch(layoutActions.makeAlert({
         type: AlertType.error,
-        message: 'Please enter artist and album fields',
+        message: 'search_error_empty',
       }));
       return;
     }
@@ -269,7 +271,7 @@ const ImageInput: FC = () => {
           />
         </label>
         <div className={classes.size}>
-          {imgUrl === undefined && '(유지)'}
+          {imgUrl === undefined && t('keep')}
           {imgUrl && `${size.width}x${size.height}`}
         </div>
       </div>
@@ -284,8 +286,8 @@ const ImageInput: FC = () => {
             : undefined
         }
       >
-        {!!imgUrl && <MenuItem onClick={handleCopy}>복사</MenuItem>}
-        <MenuItem onClick={handlePaste}>붙여넣기</MenuItem>
+        {!!imgUrl && <MenuItem onClick={handleCopy}>{t('copy')}</MenuItem>}
+        <MenuItem onClick={handlePaste}>{t('paste')}</MenuItem>
         {!!imgUrl && (
           <MenuItem
             component='a'
@@ -293,13 +295,13 @@ const ImageInput: FC = () => {
             onClick={handleClose}
             download
           >
-            다운로드
+            {t('download')}
           </MenuItem>
         )}
         {!!imgUrl && (
-          <MenuItem onClick={handleDelete}>제거</MenuItem>
+          <MenuItem onClick={handleDelete}>{t('delete')}</MenuItem>
         )}
-        <MenuItem onClick={handleSearchMusic}>검색</MenuItem>
+        <MenuItem onClick={handleSearchMusic}>{t('search')}</MenuItem>
       </Menu>
     </>
   );

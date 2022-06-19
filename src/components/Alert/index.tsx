@@ -5,6 +5,7 @@ import Snackbar from '@material-ui/core/Snackbar';
 import SnackbarContent from '@material-ui/core/SnackbarContent';
 import { makeStyles } from '@material-ui/core/styles';
 import { Close } from '@material-ui/icons';
+import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 
 import actions from 'store/layout/actions';
@@ -43,6 +44,7 @@ const Alert: React.FC = () => {
   const dispatch = useDispatch();
   const state = useSelector(selector);
   const [alertOption, setAlertOption] = useState(state);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (state.type) {
@@ -70,7 +72,7 @@ const Alert: React.FC = () => {
         className={type ? classes[type] : undefined}
         message={(
           <span id='client-snackbar' className={classes.message}>
-            {message}
+            {t(message)}
           </span>
         )}
         action={[

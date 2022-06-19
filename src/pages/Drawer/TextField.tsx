@@ -3,13 +3,14 @@ import React from 'react';
 import TextField from '@material-ui/core/TextField';
 import AutoComplete from '@material-ui/lab/Autocomplete';
 import { FilterOptionsState } from '@material-ui/lab/useAutocomplete';
+import { TFunction, useTranslation } from 'react-i18next';
 
 import { FieldKeys, Option } from 'store/music/types';
 
-const filterOptions: (
+const filterOptions = (t: TFunction) => (
   options: Option[],
-  state: FilterOptionsState<Option>
-) => Option[] = (options, { inputValue }) => options
+  { inputValue }: FilterOptionsState<Option>,
+) => options
   .concat(inputValue.length ? [{
     value: inputValue,
     label: inputValue,
@@ -19,10 +20,10 @@ const filterOptions: (
   .slice(0, 5)
   .concat([{
     value: '',
-    label: '(공란)',
+    label: t('empty'),
   }, {
     value: undefined,
-    label: '(유지)',
+    label: t('keep'),
   }]);
 
 interface Props {
@@ -40,36 +41,39 @@ const Field: React.FC<Props> = ({
   options,
   value,
   onChange,
-}) => (
-  <AutoComplete
-    size='small'
-    options={options}
-    filterOptions={filterOptions}
-    fullWidth
-    value={value}
-    selectOnFocus
-    handleHomeEndKeys
-    clearOnBlur
-    freeSolo
-    onChange={(_, v) => (v
-      ? onChange(name, typeof v === 'string'
-        ? { value: v, label: v }
-        : v)
-      : undefined
-    )}
-    renderInput={(params) => (
-      <TextField
-        {...params}
-        variant='outlined'
-        label={label}
-        name={name}
-      />
-    )}
-    getOptionLabel={getOptionLabel}
-    renderOption={(option) => (
-      <>{option.value ? getOptionLabel(option) : <i>{option.label}</i>}</>
-    )}
-  />
-);
+}) => {
+  const { t } = useTranslation();
+  return (
+    <AutoComplete
+      size='small'
+      options={options}
+      filterOptions={filterOptions(t)}
+      fullWidth
+      value={{ ...value, label: t(value.label) }}
+      selectOnFocus
+      handleHomeEndKeys
+      clearOnBlur
+      freeSolo
+      onChange={(_, v) => (v
+        ? onChange(name, typeof v === 'string'
+          ? { value: v, label: v }
+          : v)
+        : undefined
+      )}
+      renderInput={(params) => (
+        <TextField
+          {...params}
+          variant='outlined'
+          label={label}
+          name={name}
+        />
+      )}
+      getOptionLabel={getOptionLabel}
+      renderOption={(option) => (
+        <>{option.value ? getOptionLabel(option) : <i>{option.label}</i>}</>
+      )}
+    />
+  );
+};
 
 export default Field;

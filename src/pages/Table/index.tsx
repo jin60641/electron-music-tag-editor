@@ -1,10 +1,15 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, {
+  useCallback,
+  useMemo,
+  useState,
+} from 'react';
 
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
+import { useTranslation } from 'react-i18next';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import {
   AutoSizer,
@@ -47,7 +52,7 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     flexGrow: 1,
     height: '100vh',
-    overflowX: 'auto',
+    overflow: 'hidden',
   },
   headerCell: {
     display: 'flex',
@@ -83,6 +88,7 @@ const useStyles = makeStyles((theme) => ({
     minWidth: '100vw',
     '&:focus': { outline: 'none' },
   },
+  tableShift: { minWidth: `calc(100vw - ${drawerWidth}px)` },
   flexContainer: {
     display: 'flex',
     alignItems: 'center',
@@ -127,52 +133,42 @@ const COLUMNS: Columns = {
     ),
   },
   title: {
-    label: '곡명',
     dataKey: 'title',
     cellDataGetter,
   },
   album: {
-    label: '앨범',
     dataKey: 'album',
     cellDataGetter,
   },
   artist: {
-    label: '아티스트',
     dataKey: 'artist',
     cellDataGetter,
   },
   albumartist: {
-    label: '앨범 아티스트',
     dataKey: 'albumartist',
     cellDataGetter,
   },
   genre: {
-    label: '장르',
     dataKey: 'genre',
     cellDataGetter,
   },
   composer: {
-    label: '작곡가',
     dataKey: 'composer',
     cellDataGetter,
   },
   track: {
-    label: '트랙',
     dataKey: 'track',
     cellDataGetter,
   },
   disk: {
-    label: '디스크',
     dataKey: 'disk',
     cellDataGetter,
   },
   comment: {
-    label: '코멘트',
     dataKey: 'comment',
     cellDataGetter,
   },
   filename: {
-    label: '파일명',
     dataKey: 'filename',
     cellDataGetter: ({ rowData: { path } }) => getFilenameFromPath(path),
   },
@@ -223,6 +219,7 @@ const Table: React.FC = () => {
     lastSelected,
   } = useSelector(selector, shallowEqual);
   const classes = useStyles();
+  const { t } = useTranslation();
 
   const [isFileDragging, setIsFileDragging] = useState(false);
   const [isHeaderDragging, setIsHeaderDragging] = useState(false);
@@ -232,11 +229,6 @@ const Table: React.FC = () => {
     column?: ColumnItem;
     row?: Music;
   }>(initialContextAnchor);
-  const width = Math.max(
-    document.documentElement.clientWidth || 0,
-    window.innerWidth || 0,
-    columns.reduce((a, b) => a + b.width, 0),
-  );
 
   const rows = useMemo(() => list.sort((a, b) => {
     const lValue = a.metadata[sortBy] || '';
@@ -412,6 +404,8 @@ const Table: React.FC = () => {
     }
   }, [handleCloseContextMenu, contextAnchor]);
 
+  const columnWidths = useMemo(() => columns.reduce((a, b) => a + b.width, 0), [columns]);
+
   return (
     <>
       <Loading />
@@ -420,129 +414,147 @@ const Table: React.FC = () => {
         className={classes.main}
       >
         <AutoSizer>
-          {({ height }) => (
-            <DragDropContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-              <Droppable
-                droppableId='Table'
-                direction='horizontal'
-                mode='virtual'
-                renderClone={(provided, _snapshot, rubric) => (
-                  <div
-                    {...provided.draggableProps}
-                    {...provided.dragHandleProps}
-                    ref={provided.innerRef}
-                  >
-                    <TableHeaderCell
-                      {...columns[rubric.source.index]}
-                      columnIndex={rubric.source.index}
-                      isDragging={isHeaderDragging}
-                      isPlaceholder
-                    />
-                  </div>
-                )}
-              >
-                {(droppableContext) => (
-                  <div
-                    {...droppableContext.droppableProps}
-                    ref={droppableContext.innerRef}
-                    style={{
-                      width,
-                      height,
-                    }}
-                    role='searchbox'
-                    onKeyDown={handleKeyDown}
-                    tabIndex={0}
-                  >
-                    <RVTable
-                      className={classes.table}
-                      height={height}
-                      overscanRowCount={50}
-                      overscanIndicesGetter={({
-                        cellCount,
-                        overscanCellsCount,
-                        startIndex,
-                        stopIndex,
-                      }) => ({
-                        overscanStartIndex: Math.max(
-                          0,
-                          startIndex - overscanCellsCount,
-                        ),
-                        overscanStopIndex: Math.min(
-                          cellCount - 1,
-                          stopIndex + overscanCellsCount,
-                        ),
-                      })}
-                      width={width}
-                      rowGetter={({ index }) => rows[index]}
-                      {...tableProps}
-                      rowClassName={getRowClassName}
-                      headerClassName={clsx(
-                        classes.headerCell,
-                        isHeaderDragging && classes.isHeaderDragging,
-                      )}
+          {({ height, width }) => {
+            const w = Math.max(
+              columnWidths,
+              document.documentElement.clientWidth || 0,
+              window.innerWidth || 0,
+            );
+
+            return (
+              <DragDropContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+                <Droppable
+                  droppableId='Table'
+                  direction='horizontal'
+                  mode='virtual'
+                  renderClone={(provided, _snapshot, rubric) => (
+                    <div
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
+                      ref={provided.innerRef}
                     >
-                      {columns.map(({
-                        className,
-                        dataKey,
-                        ...other
-                      }, index: number) => (
-                        <Column
-                          key={`Column-${dataKey}`}
-                          headerRenderer={(headerProps) => (
-                            <TableHeaderCell
-                              {...headerProps}
-                              {...columns[index]}
-                              columnIndex={index}
-                              isDragging={isHeaderDragging}
-                              onRightClick={handleHeaderRightClick}
-                            />
-                          )}
-                          className={clsx(classes.flexContainer, className)}
-                          cellRenderer={(props) => (
-                            <TableBodyCell
-                              {...props}
-                              {...columns[props.columnIndex]}
-                            />
-                          )}
-                          dataKey={dataKey}
-                          {...other}
-                        />
-                      ))}
-                    </RVTable>
-                    <Menu
-                      keepMounted
-                      open={contextAnchor.mouseY !== null}
-                      onClose={handleCloseContextMenu}
-                      anchorReference='anchorPosition'
-                      anchorPosition={
-                        contextAnchor.mouseY !== null && contextAnchor.mouseX !== null
-                          ? { top: contextAnchor.mouseY, left: contextAnchor.mouseX }
-                          : undefined
-                      }
+                      <TableHeaderCell
+                        {...columns[rubric.source.index]}
+                        label={
+                          columns[rubric.source.index].label
+                          || t(columns[rubric.source.index].dataKey)
+                        }
+                        columnIndex={rubric.source.index}
+                        isDragging={isHeaderDragging}
+                        isPlaceholder
+                      />
+                    </div>
+                  )}
+                >
+                  {(droppableContext) => (
+                    <div
+                      {...droppableContext.droppableProps}
+                      ref={droppableContext.innerRef}
+                      style={{
+                        height,
+                        width,
+                        overflow: 'overlay hidden',
+                      }}
+                      role='searchbox'
+                      onKeyDown={handleKeyDown}
+                      tabIndex={0}
                     >
-                      {!!contextAnchor.column && (
-                        <MenuItem onClick={handleClickRemoveColumn}>
-                          {`'${contextAnchor.column.label}' 제거`}
-                        </MenuItem>
-                      )}
-                      {!!contextAnchor.row && (
-                        <MenuItem onClick={handleClickRemoveRow}>
-                          {`'${contextAnchor.row.metadata.title || getFilenameFromPath(contextAnchor.row.path)}'`}
-                          {selectedRows.length >= 2 && ` 외 ${selectedRows.length - 1}곡`}
-                          {' 제거'}
-                        </MenuItem>
-                      )}
-                      {!!contextAnchor.row && (
-                        <MenuItem onClick={handleClickOpenFinder}>
-                          Show in finder
-                        </MenuItem>
-                      )}
-                    </Menu>
-                  </div>
-                )}
-              </Droppable>
-            </DragDropContext>
-          )}
+                      <RVTable
+                        className={clsx(classes.table, isDrawerOpen && classes.tableShift)}
+                        height={height}
+                        overscanRowCount={50}
+                        overscanIndicesGetter={({
+                          cellCount,
+                          overscanCellsCount,
+                          startIndex,
+                          stopIndex,
+                        }) => ({
+                          overscanStartIndex: Math.max(
+                            0,
+                            startIndex - overscanCellsCount,
+                          ),
+                          overscanStopIndex: Math.min(
+                            cellCount - 1,
+                            stopIndex + overscanCellsCount,
+                          ),
+                        })}
+                        rowGetter={({ index }) => rows[index]}
+                        width={w}
+                        {...tableProps}
+                        rowClassName={getRowClassName}
+                        headerClassName={clsx(
+                          classes.headerCell,
+                          isHeaderDragging && classes.isHeaderDragging,
+                        )}
+                      >
+                        {columns.map(({
+                          className,
+                          dataKey,
+                          label,
+                          ...other
+                        }, index: number) => (
+                          <Column
+                            key={`Column-${dataKey}`}
+                            headerRenderer={(headerProps) => (
+                              <TableHeaderCell
+                                {...headerProps}
+                                {...columns[index]}
+                                columnIndex={index}
+                                isDragging={isHeaderDragging}
+                                onRightClick={handleHeaderRightClick}
+                              />
+                            )}
+                            className={clsx(classes.flexContainer, className)}
+                            cellRenderer={(props) => (
+                              <TableBodyCell
+                                {...props}
+                                {...columns[props.columnIndex]}
+                              />
+                            )}
+                            dataKey={dataKey}
+                            label={label ?? t(dataKey)}
+                            {...other}
+                          />
+                        ))}
+                      </RVTable>
+                      <Menu
+                        keepMounted
+                        open={contextAnchor.mouseY !== null}
+                        onClose={handleCloseContextMenu}
+                        anchorReference='anchorPosition'
+                        anchorPosition={
+                          contextAnchor.mouseY !== null && contextAnchor.mouseX !== null
+                            ? { top: contextAnchor.mouseY, left: contextAnchor.mouseX }
+                            : undefined
+                        }
+                      >
+                        {!!contextAnchor.column && (
+                          <MenuItem onClick={handleClickRemoveColumn}>
+                            {console.log(t(contextAnchor.column.dataKey))}
+                            {t('remove_column', { column: t(contextAnchor.column.dataKey) })}
+                          </MenuItem>
+                        )}
+                        {!!contextAnchor.row && (
+                          <MenuItem onClick={handleClickRemoveRow}>
+                            {t('removeRow', {
+                              row: contextAnchor.row.metadata.title
+                                || getFilenameFromPath(contextAnchor.row.path),
+                              count: selectedRows.length - 1,
+                            })}
+                          </MenuItem>
+                        )}
+                        {!!contextAnchor.row && (
+                          <MenuItem onClick={handleClickOpenFinder}>
+                            {t('show_in_finder')}
+                          </MenuItem>
+                        )}
+                      </Menu>
+                    </div>
+                  )}
+                </Droppable>
+              </DragDropContext>
+            );
+          }}
         </AutoSizer>
         <div
           onDragEnter={handleDragEnter}

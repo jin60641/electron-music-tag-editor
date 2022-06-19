@@ -2,6 +2,7 @@ import React, { useCallback } from 'react';
 
 import Button from '@material-ui/core/Button';
 import { makeStyles } from '@material-ui/core/styles';
+import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 
 import Modal from 'components/Modal';
@@ -44,11 +45,12 @@ const Map: {
   [key in PreferenceState]: React.FC<any>
 } = {
   [PreferenceState.columns]: Columns,
-  [PreferenceState.theme]: Theme,
+  [PreferenceState.themes]: Theme,
   [PreferenceState.language]: Language,
 };
 
 const Preference: React.FC = () => {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const classes = useStyles();
   const page = useSelector(selector);
@@ -86,7 +88,7 @@ const Preference: React.FC = () => {
             color={page === key ? 'primary' : undefined}
             disableRipple
           >
-            {key}
+            {t(key)}
           </Button>
         ))}
       </div>

@@ -11,6 +11,7 @@ import Typography from '@material-ui/core/Typography';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import clsx from 'clsx';
+import { useTranslation } from 'react-i18next';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 
 import layoutActions from 'store/layout/actions';
@@ -37,7 +38,7 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     flexGrow: 1,
     flexDirection: 'column',
-    overflowY: 'scroll',
+    overflowY: 'auto',
   },
   list: {
     display: 'flex',
@@ -90,36 +91,20 @@ const selector = ({
   picture,
 });
 
-const FIELDS: { key: FieldKeys, label: string }[] = [{
-  key: 'title',
-  label: '곡명',
-}, {
-  key: 'artist',
-  label: '아티스트',
-}, {
-  key: 'album',
-  label: '앨범',
-}, {
-  key: 'albumartist',
-  label: '앨범 아티스트',
-}, {
-  key: 'genre',
-  label: '장르',
-}, {
-  key: 'comment',
-  label: '코멘트',
-}, {
-  key: 'composer',
-  label: '작곡가',
-}, {
-  key: 'track',
-  label: '트랙',
-}, {
-  key: 'disk',
-  label: '디스크',
-}];
+const FIELDS: FieldKeys[] = [
+  'title',
+  'artist',
+  'album',
+  'albumartist',
+  'genre',
+  'comment',
+  'composer',
+  'track',
+  'disk',
+];
 
 const Drawer: React.FC = () => {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const {
     list,
@@ -192,12 +177,12 @@ const Drawer: React.FC = () => {
         <div className={classes.drawerContent}>
           <List className={classes.list}>
             {FIELDS.map((field) => (
-              <ListItem key={`Drawer-ListItem-${field.key}`}>
+              <ListItem key={`Drawer-ListItem-${field}`}>
                 <TextField
-                  name={field.key}
-                  label={field.label}
-                  options={options[field.key]}
-                  value={values[field.key]}
+                  name={field}
+                  label={t(field)}
+                  options={options[field]}
+                  value={values[field]}
                   onChange={handleChangeText}
                 />
               </ListItem>

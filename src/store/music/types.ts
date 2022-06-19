@@ -49,7 +49,7 @@ export enum Actions {
   OPEN_FINDER = 'MUSIC.OPEN_FINDER',
 }
 
-export const defaultOption = { label: '(유지)', value: undefined };
+export const defaultOption = { label: 'keep', value: undefined };
 
 export const initialInputValues: InputValues = {
   title: defaultOption,

@@ -18,11 +18,10 @@ export const initializeI18next = async (locale: string) => {
     resources: { [locale]: { translation } },
     interpolation: {
       escapeValue: false,
-      prefix: '{',
-      suffix: '}',
+      prefix: '{{',
+      suffix: '}}',
     },
-    nonExplicitWhitelist: true,
-    keySeparator: false,
+    pluralSeparator: '_',
   });
 
   return i18next;

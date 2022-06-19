@@ -54,7 +54,7 @@ const searchMusicFailureEpic: Epic = (action$) => action$.pipe(
   filter(isActionOf(actions.searchMusic.failure)),
   mergeMap(() => [layoutActions.makeAlert({
     type: AlertType.error,
-    message: "There's no search results",
+    message: 'no_search_result',
   })]),
 );
 export default combineEpics(
