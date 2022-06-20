@@ -36,11 +36,12 @@ import Picture from './Picture';
 import TableBodyCell from './TableBodyCell';
 import TableHeaderCell from './TableHeaderCell';
 
-interface ColumnItem extends Omit<ColumnProps, 'dataKey' | 'width'> {
+interface ColumnItem extends Omit<ColumnProps, 'dataKey' | 'width' | 'cellDataGetter'> {
   dataKey: DataKey,
   disableResize?: boolean;
   width?: number;
   numeric?: boolean;
+  cellDataGetter: ColumnProps['cellDataGetter'],
 }
 
 type Columns = {
@@ -230,9 +231,13 @@ const Table: React.FC = () => {
     row?: Music;
   }>(initialContextAnchor);
 
-  const rows = useMemo(() => list.sort((a, b) => {
-    const lValue = a.metadata[sortBy] || '';
-    const rValue = b.metadata[sortBy] || '';
+  const rows = useMemo(() => (!sortBy) ? list : list.sort((a, b) => {
+    const column = COLUMNS[sortBy].cellDataGetter;
+    if (!column) {
+      return 1;
+    }
+    const lValue = column({ rowData: a, dataKey: sortBy }) || '';
+    const rValue = column({ rowData: b, dataKey: sortBy }) || '';
     if (lValue === rValue) {
       return 1;
     }
@@ -247,9 +252,10 @@ const Table: React.FC = () => {
   const handleClickRow = useCallback(({ index, event: e }: RowMouseEventHandlerParams) => {
     e.preventDefault();
     e.stopPropagation();
-    if (e.ctrlKey || e.metaKey) {
+    const { ctrlKey, metaKey, shiftKey } = e;
+    if (ctrlKey || metaKey) {
       dispatch(musicActions.selectMusicAdd(index));
-    } else if (e.shiftKey) {
+    } else if (shiftKey) {
       dispatch(musicActions.selectMusicMulti(index));
       const selection = document.getSelection();
       if (selection) {
@@ -261,14 +267,14 @@ const Table: React.FC = () => {
   }, [dispatch]);
 
   const handleRightClickRow = useCallback((params: RowMouseEventHandlerParams) => {
-    const { event: e, index } = params;
+    const { event: { clientX, clientY }, index } = params;
     if (!rows[index].isSelected) {
       handleClickRow(params);
     }
     if (index >= 0) {
       setContextAnchor({
-        mouseX: e.clientX - 2,
-        mouseY: e.clientY - 4,
+        mouseX: clientX - 2,
+        mouseY: clientY - 4,
         row: rows[index],
       });
     }
@@ -282,10 +288,6 @@ const Table: React.FC = () => {
       [classes.tableRowCursor]: index === lastSelected,
     },
   ), [classes, handleClickRow, lastSelected]);
-
-  const handleSort = useCallback((payload) => {
-    dispatch(tableActions.setSort(payload));
-  }, [dispatch]);
 
   const handleDragStart = useCallback(() => {
     setIsHeaderDragging(true);
@@ -313,9 +315,10 @@ const Table: React.FC = () => {
     columnIndex: number,
   ) => {
     if (columnIndex > 0) {
+      const { clientX, clientY } = e;
       setContextAnchor({
-        mouseX: e.clientX - 2,
-        mouseY: e.clientY - 4,
+        mouseX: clientX - 2,
+        mouseY: clientY - 4,
         column: columns[columnIndex],
       });
     }
@@ -343,7 +346,6 @@ const Table: React.FC = () => {
   const tableProps = {
     rowHeight,
     headerHeight,
-    sort: handleSort,
     sortBy,
     sortDirection,
     onRowClick: handleClickRow,
@@ -367,37 +369,40 @@ const Table: React.FC = () => {
 
   const handleDrop = useCallback((e) => {
     setIsFileDragging(false);
-    if (e.dataTransfer.files?.length) {
+    const { dataTransfer } = e;
+    if (dataTransfer.files?.length) {
       window.bridge.ipc.send(
         getType(musicActions.openMusic.request),
         [...e.dataTransfer.files].map(({ path }) => path),
       );
-      e.dataTransfer.clearData();
+      dataTransfer.clearData();
     }
   }, []);
 
   const handleKeyDown = useCallback((e) => {
-    if (e.key === 'ArrowDown') {
+    const { key, ctrlKey, metaKey } = e;
+    if (key === 'ArrowDown') {
       dispatch(musicActions.setLastSelected(Math.min(
         lastSelected === undefined ? 0 : lastSelected + 1,
         rows.length - 1,
       )));
-    } else if (e.key === 'ArrowUp') {
+    } else if (key === 'ArrowUp') {
       dispatch(musicActions.setLastSelected(Math.max(
         lastSelected === undefined ? 0 : lastSelected - 1,
         0,
       )));
-    } else if (e.key === 'Backspace') {
+    } else if (key === 'Backspace') {
       dispatchRemoveMusics();
-    } else if (e.key === ' ' && lastSelected !== undefined) {
+    } else if (key === ' ' && lastSelected !== undefined) {
       dispatch(musicActions.selectMusicAdd(lastSelected));
-    } else if (e.key === 'a' && (e.ctrlKey || e.metaKey)) {
+    } else if (key === 'a' && (ctrlKey || metaKey)) {
       e.preventDefault();
       dispatch(musicActions.selectMusicAll(true));
     }
   }, [dispatch, lastSelected, rows, dispatchRemoveMusics]);
 
-  const handleClickOpenFinder = useCallback(() => {
+  const handleClickOpenFinder = useCallback((e) => {
+    e.persist();
     if (contextAnchor.row?.path) {
       window.bridge.ipc.send(getType(musicActions.openFinder), contextAnchor.row.path);
       handleCloseContextMenu();

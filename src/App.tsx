@@ -1,15 +1,15 @@
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { CssBaseline } from '@material-ui/core';
-import { createMuiTheme, makeStyles, ThemeProvider } from '@material-ui/core/styles';
+import { createTheme, makeStyles, ThemeProvider } from '@material-ui/core/styles';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import { I18nextProvider } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import {
-  Redirect,
+  Navigate,
   Route,
   HashRouter as Router,
-  Switch,
+  Routes,
 } from 'react-router-dom';
 
 import Alert from 'components/Alert';
@@ -48,7 +48,7 @@ const App: React.FC = () => {
     return palette;
   }, [prefersDarkMode, palette]);
 
-  const theme = useMemo(() => createMuiTheme({
+  const theme = useMemo(() => createTheme({
     overrides,
     palette: {
       type: paletteType,
@@ -72,11 +72,10 @@ const App: React.FC = () => {
         <CssBaseline />
         <Router>
           <main className={classes.content}>
-            <Switch>
+            <Routes>
               <Route
                 path='/'
-                exact
-                component={Main}
+                element={<Main />}
               />
               {routes.map(({
                 key,
@@ -88,8 +87,8 @@ const App: React.FC = () => {
                   {...props}
                 />
               ))}
-              <Redirect to='/' />
-            </Switch>
+              <Route path='*' element={<Navigate to='/' />} />
+            </Routes>
           </main>
         </Router>
         <Alert />

@@ -14,7 +14,7 @@ export interface TableState {
   columns: Column[],
   headerHeight: number,
   rowHeight: number,
-  sortBy: keyof Metadata,
+  sortBy: DataKey,
   sortDirection: typeof SortDirection.ASC | typeof SortDirection.DESC,
   search: string,
 }

@@ -12,7 +12,7 @@ module.exports = {
   rules: {
     'consistent-return': 'off',
     '@typescript-eslint/no-unused-vars': 'off',
-    '@typescript-eslint/no-unused-vars-experimental': 'error',
+    // '@typescript-eslint/no-unused-vars-experimental': 'error',
     'react/jsx-props-no-spreading': 'off',
     'import/prefer-default-export': 'off',
     'import/first': 'error',
@@ -51,12 +51,14 @@ module.exports = {
     'react-hooks/rules-of-hooks': 'error',
     'react-hooks/exhaustive-deps': 'warn',
     'react/jsx-no-duplicate-props': ['error', { 'ignoreCase': false }],
+    /*
     'jsx-a11y/label-has-associated-control': [ 2, {
       'labelComponents': ['CustomInputLabel'],
       'labelAttributes': ['label'],
       'controlComponents': ['CustomInput'],
       'depth': 3,
     }],
+    */
   },
   globals: {
     Atomics: 'readonly',

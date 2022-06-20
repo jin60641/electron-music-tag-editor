@@ -13,6 +13,7 @@ import {
   SortDirection,
 } from 'react-virtualized';
 
+import { Metadata } from 'store/music/types';
 import tableActions from 'store/table/actions';
 import { DataKey } from 'store/table/types';
 import { RootState } from 'store/types';
@@ -131,6 +132,17 @@ const TableHeaderCell: React.FC<TableHeaderCellProps> = ({
     align: numeric ? 'right' : 'left',
   };
 
+  const handleSort = useCallback(() => {
+    if (dataKey === 'isSelected') {
+      return;
+    }
+    const dir = dataKey === sortBy ?  SortDirection.ASC === sortDirection ? SortDirection.DESC : SortDirection.ASC : SortDirection.ASC;
+    dispatch(tableActions.setSort({
+      sortBy: dataKey,
+      sortDirection: dir,
+    }));
+  }, [dispatch, sortDirection, dataKey, sortBy]);
+
   if (isPlaceholder) {
     return (
       <TableCell
@@ -155,6 +167,7 @@ const TableHeaderCell: React.FC<TableHeaderCellProps> = ({
         {(draggableContext) => (
           <TableCell
             onContextMenu={handleContextMenu}
+            onClick={handleSort}
             {...tableCellProps}
             className={clsx(
               tableCellProps.className,
@@ -191,6 +204,7 @@ const TableHeaderCell: React.FC<TableHeaderCellProps> = ({
             role='presentation'
             className={classes.resizeHandle}
             onClick={(e) => {
+              e.persist();
               e.stopPropagation();
             }}
             onDoubleClick={handleDoubleClick}

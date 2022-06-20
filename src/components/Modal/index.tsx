@@ -48,6 +48,7 @@ interface Props {
   isOpen: ModalProps['open'],
   onClose: () => void,
   title: string,
+  children?: React.ReactNode,
 }
 
 const Modal: React.FC<Props> = ({ children, isOpen, onClose, title }) => {

@@ -66,6 +66,7 @@ const Check: React.FC<Props> = ({ isChecked, id }) => {
             control={(
               <Checkbox
                 color='primary'
+                value={checked}
                 checked={checked}
                 onClick={handleClick}
                 onChange={handleChange}

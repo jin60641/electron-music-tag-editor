@@ -104,7 +104,7 @@ export interface OpenMusicRequestPayload {
 export type AddMusicsRequestPayload = OpenMusicRequestPayload[];
 export type UpdateMusicsRequestPayload = OpenMusicRequestPayload[];
 
-export interface Metadata extends Omit<RawMetadata, 'image' | 'comment' | 'performerInfo' | 'partOfSet' | 'trackNumber'>{
+export interface Metadata extends Omit<RawMetadata, 'image' | 'comment' | 'performerInfo' | 'partOfSet' | 'trackNumber'> {
   albumartist?: string,
   track?: string,
   disk?: string,

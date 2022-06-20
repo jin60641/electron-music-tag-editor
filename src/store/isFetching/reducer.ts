@@ -31,7 +31,7 @@ Actions.forEach((actions) => {
   });
 });
 
-const isFetching: Reducer<IsFetchingState, RootAction> = (state = initialState, action) => {
+const isFetching: Reducer<IsFetchingState, RootAction> = (state = initialState, action = {} as RootAction) => {
   const handler = middlewares[action.type];
   if (handler) {
     return handler(state);

@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 
 import { makeStyles } from '@material-ui/core/styles';
 
-const fallbackImg = require('assets/album-cover.png').default;
+const fallbackImg = require('assets/album-cover.png');
 
 const useStyles = makeStyles((theme) => ({
   root: {

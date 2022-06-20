@@ -1,3 +1,4 @@
+import { enable, initialize } from '@electron/remote/main';
 import axios from 'axios';
 import {
   app,
@@ -38,14 +39,15 @@ app.on('window-all-closed', () => {
 app.on('before-quit', close);
 app.on('will-quit', close);
 
+initialize();
+
 const openFiles: string[] = [];
 let win: BrowserWindow;
-const createWindow = () => {
+const createWindow = async () => {
   win = new BrowserWindow({
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: true,
-      enableRemoteModule: true,
       preload: `${__dirname}/preload.js`,
     },
   });
@@ -308,6 +310,7 @@ const createWindow = () => {
     saveMusics(win, filePaths);
   });
 
+  await enable(win.webContents);
   ipcMain.on('INIT', () => {
     if (openFiles.length) {
       setCount(win, openFiles.length);
