@@ -7,6 +7,7 @@ import { initialState } from './types';
 const persistConfig = {
   key: 'table',
   storage: window.bridge.storage,
+  blacklist: ['search'],
 };
 
 const tableReducer = createReducer(initialState)

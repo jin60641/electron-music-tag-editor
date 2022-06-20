@@ -381,6 +381,7 @@ const Table: React.FC = () => {
 
   const handleKeyDown = useCallback((e) => {
     const { key, ctrlKey, metaKey } = e;
+    e.stopPropagation();
     if (key === 'ArrowDown') {
       dispatch(musicActions.setLastSelected(Math.min(
         lastSelected === undefined ? 0 : lastSelected + 1,

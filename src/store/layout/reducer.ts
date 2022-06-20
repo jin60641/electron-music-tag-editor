@@ -8,6 +8,10 @@ const layoutReducer = createReducer<LayoutState>(initialState)
     ...state,
     drawer: action.payload,
   }))
+  .handleAction(layoutActions.setSearch, (state, action) => ({
+    ...state,
+    search: action.payload,
+  }))
   .handleAction(layoutActions.setPalette, (state, action) => ({
     ...state,
     palette: action.payload,
