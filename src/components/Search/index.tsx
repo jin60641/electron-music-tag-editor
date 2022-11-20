@@ -73,6 +73,8 @@ const Search = () => {
     if (e.key === 'Enter') {
       const nextIndex = (index + 1) % searched.length;
       setIndex(nextIndex);
+    } else if (e.key === 'Escape') {
+      handleClose();
     }
   };
 
