@@ -4,7 +4,7 @@ import TextField from '@material-ui/core/TextField';
 import AutoComplete from '@material-ui/lab/Autocomplete';
 import { FilterOptionsState } from '@material-ui/lab/useAutocomplete';
 
-import { FieldKeys, Option } from './types';
+import { FieldKeys, Option } from 'store/music/types';
 
 const filterOptions: (
   options: Option[],

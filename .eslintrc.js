@@ -51,6 +51,12 @@ module.exports = {
     'react-hooks/rules-of-hooks': 'error',
     'react-hooks/exhaustive-deps': 'warn',
     'react/jsx-no-duplicate-props': ['error', { 'ignoreCase': false }],
+    'jsx-a11y/label-has-associated-control': [ 2, {
+      'labelComponents': ['CustomInputLabel'],
+      'labelAttributes': ['label'],
+      'controlComponents': ['CustomInput'],
+      'depth': 3,
+    }],
   },
   globals: {
     Atomics: 'readonly',

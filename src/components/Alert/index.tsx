@@ -68,14 +68,13 @@ const Alert: React.FC = () => {
     >
       <SnackbarContent
         className={type ? classes[type] : undefined}
-        aria-describedby='client-snackbar'
         message={(
           <span id='client-snackbar' className={classes.message}>
             {message}
           </span>
         )}
         action={[
-          <IconButton key='close' aria-label='close' color='inherit' onClick={handleClose}>
+          <IconButton key='close' color='inherit' onClick={handleClose}>
             <Close className={classes.icon} />
           </IconButton>,
         ]}

@@ -89,7 +89,7 @@ const useStyles = makeStyles((theme) => ({
   },
   tableRow: {
     minWidth: '100vw',
-    borderBottom: '1px solid rgba(224, 224, 224, 1)',
+    borderBottom: `1px solid ${theme.palette.grey[200]}`,
     cursor: 'pointer',
   },
   tableRowCursor: { backgroundColor: theme.palette.grey[200] },

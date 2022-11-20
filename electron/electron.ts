@@ -1,3 +1,4 @@
+import axios from 'axios';
 import {
   app,
   BrowserWindow,
@@ -15,12 +16,16 @@ import * as NodeID3 from 'node-id3';
 import * as path from 'path';
 
 import {
-  addMusic,
+  addMusics,
   openPreference,
   resetMusic,
-  saveMusic,
+  saveMusics,
+  searchMusic,
   setCount,
 } from './apis';
+
+axios.defaults.baseURL = 'https://api.discogs.com';
+axios.defaults.headers.common = { Authorization: `Discogs token=${process.env.DISCOGS_API_TOKEN}` };
 
 const close = () => null;
 
@@ -54,7 +59,7 @@ const createWindow = () => {
         resetMusic(win);
         setCount(win, filePaths.length);
       }
-      filePaths.forEach((filePath) => addMusic(win, filePath));
+      addMusics(win, filePaths);
     });
   };
 
@@ -64,7 +69,7 @@ const createWindow = () => {
       filters: [{ name: 'Musics', extensions: ['mp3'] }], // TODO: support more music formats (ex. wav, flac, m4p, m4a)
     }).then(({ filePaths }) => {
       setCount(win, filePaths.length);
-      filePaths.forEach((filePath) => addMusic(win, filePath));
+      addMusics(win, filePaths);
     });
   };
 
@@ -73,13 +78,12 @@ const createWindow = () => {
       if (dirPaths.length) {
         resetMusic(win);
       }
-      dirPaths.forEach((dirPath) => {
+      const paths = dirPaths.reduce((arr, dirPath) => {
         const filePaths = glob.sync(path.join(dirPath, '**/*.mp3')); // TODO: support more music formats (ex. wav, flac, m4p, m4a)
-        setCount(win, filePaths.length);
-        filePaths.forEach((filePath) => {
-          addMusic(win, filePath);
-        });
-      });
+        return arr.concat(filePaths);
+      }, [] as string[]);
+      setCount(win, paths.length);
+      addMusics(win, paths);
     });
   };
 
@@ -88,9 +92,7 @@ const createWindow = () => {
       dirPaths.forEach((dirPath) => {
         const filePaths = glob.sync(path.join(dirPath, '**/*.mp3')); // TODO: support more music formats (ex. wav, flac, m4p, m4a)
         setCount(win, filePaths.length);
-        filePaths.forEach((filePath) => {
-          addMusic(win, filePath);
-        });
+        addMusics(win, filePaths);
       });
     });
   };
@@ -228,17 +230,29 @@ const createWindow = () => {
       if (fs.lstatSync(dirPath).isDirectory()) {
         const filePaths = glob.sync(path.join(dirPath, '**/*.mp3'));
         setCount(win, filePaths.length);
-        filePaths.forEach((filePath) => addMusic(win, filePath));
+        addMusics(win, filePaths);
       } else {
         setCount(win, 1);
-        addMusic(win, dirPath);
+        addMusics(win, [dirPath]);
       }
     });
   });
 
-  ipcMain.on('MUSIC.ADD_MUSIC', (_event, filePath) => {
-    setCount(win, 1);
-    addMusic(win, filePath);
+  ipcMain.on('MUSIC.ADD_MUSICS', (_event, filePaths) => {
+    setCount(win, filePaths.length);
+    addMusics(win, filePaths);
+  });
+
+  ipcMain.on('MUSIC.SEARCH_MUSIC', (_event, query) => {
+    axios.get<any>(`/database/search?q=${encodeURIComponent(query)}&page=1&per_page=5`)
+      .then(({ data }) => {
+        if (data?.results?.length) {
+          const result = data.results.map((item: any) => ({ picture: item.cover_image }));
+          searchMusic(win, result);
+        } else {
+          searchMusic(win, []);
+        }
+      }).catch((e) => { console.log(e); });
   });
 
   ipcMain.on('MUSIC.SAVE_MUSIC', async (_event, {
@@ -293,8 +307,8 @@ const createWindow = () => {
         delete updatedTags.image.mime;
       }
       NodeID3.write(updatedTags, filePath);
-      saveMusic(win, filePath);
     });
+    saveMusics(win, filePaths);
   });
 };
 

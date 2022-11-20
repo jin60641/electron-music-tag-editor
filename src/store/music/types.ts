@@ -1,9 +1,13 @@
 export interface MusicState {
   list: Music[],
+  search: SearchState[],
+  input: InputState,
   count: number,
   lastCount: number,
   lastSelected?: number,
 }
+
+export type SearchState = { picture?: InputPicture } & InputValues;
 
 export enum Actions {
   SET_COUNT = 'MUSIC.SET_COUNT',
@@ -20,22 +24,70 @@ export enum Actions {
   OPEN_MUSIC_SUCCESS = 'MUSIC.OPEN_MUSIC#SUCCESS',
   OPEN_MUSIC_FAILURE = 'MUSIC.OPEN_MUSIC#FAILURE',
 
-  ADD_MUSIC_REQUEST = 'MUSIC.ADD_MUSIC',
-  ADD_MUSIC_SUCCESS = 'MUSIC.ADD_MUSIC#SUCCESS',
-  ADD_MUSIC_FAILURE = 'MUSIC.ADD_MUSIC#FAILURE',
+  ADD_MUSICS_REQUEST = 'MUSIC.ADD_MUSICS',
+  ADD_MUSICS_SUCCESS = 'MUSIC.ADD_MUSICS#SUCCESS',
+  ADD_MUSICS_FAILURE = 'MUSIC.ADD_MUSICS#FAILURE',
 
-  UPDATE_MUSIC_REQUEST = 'MUSIC.UPDATE_MUSIC',
-  UPDATE_MUSIC_SUCCESS = 'MUSIC.UPDATE_MUSIC#SUCCESS',
-  UPDATE_MUSIC_FAILURE = 'MUSIC.UPDATE_MUSIC#FAILURE',
+  UPDATE_MUSICS_REQUEST = 'MUSIC.UPDATES_MUSIC',
+  UPDATE_MUSICS_SUCCESS = 'MUSIC.UPDATES_MUSIC#SUCCESS',
+  UPDATE_MUSICS_FAILURE = 'MUSIC.UPDATES_MUSIC#FAILURE',
 
   SAVE_MUSIC_REQUEST = 'MUSIC.SAVE_MUSIC',
   SAVE_MUSIC_SUCCESS = 'MUSIC.SAVE_MUSIC#SUCCESS',
   SAVE_MUSIC_FAILURE = 'MUSIC.SAVE_MUSIC#FAILURE',
 
+  UPDATE_INPUT = 'MUSIC.UPDATE_INPUT',
+  SET_INPUT_OPTIONS = 'MUSIC.SET_INPUT_OPTIONS',
+  SET_INPUT_VALUES = 'MUSIC.SET_INPUT_VALUES',
+  SET_INPUT_PICTURE = 'MUSIC.SET_INPUT_PICTURE',
+
+  SEARCH_MUSIC_REQUEST = 'MUSIC.SEARCH_MUSIC',
+  SEARCH_MUSIC_SUCCESS = 'MUSIC.SEARCH_MUSIC#SUCCESS',
+  SEARCH_MUSIC_FAILURE = 'MUSIC.SEARCH_MUSIC#FAILURE',
+  RESET_SEARCH = 'MUSIC.RESET_SEARCH',
+
   OPEN_FINDER = 'MUSIC.OPEN_FINDER',
 }
 
-export const initialState: MusicState = { list: [], count: 0, lastCount: 0 };
+export const defaultOption = { label: '(유지)', value: undefined };
+
+export const initialInputValues: InputValues = {
+  title: defaultOption,
+  artist: defaultOption,
+  album: defaultOption,
+  comment: defaultOption,
+  albumartist: defaultOption,
+  genre: defaultOption,
+  composer: defaultOption,
+  track: defaultOption,
+  disk: defaultOption,
+};
+
+export const initialInputPicture: InputPicture = undefined;
+
+export const initialInputOptions: InputOptions = {
+  title: [],
+  artist: [],
+  album: [],
+  comment: [],
+  albumartist: [],
+  genre: [],
+  composer: [],
+  track: [],
+  disk: [],
+};
+
+export const initialState: MusicState = {
+  list: [],
+  count: 0,
+  lastCount: 0,
+  search: [],
+  input: {
+    values: initialInputValues,
+    options: initialInputOptions,
+    picture: initialInputPicture,
+  },
+};
 
 export interface Music {
   path: string,
@@ -48,8 +100,8 @@ export interface OpenMusicRequestPayload {
   metadata: RawMetadata,
 }
 
-export type AddMusicRequestPayload = OpenMusicRequestPayload;
-export type UpdateMusicRequestPayload = OpenMusicRequestPayload;
+export type AddMusicsRequestPayload = OpenMusicRequestPayload[];
+export type UpdateMusicsRequestPayload = OpenMusicRequestPayload[];
 
 export interface Metadata extends Omit<RawMetadata, 'image' | 'comment' | 'performerInfo' | 'partOfSet' | 'trackNumber'>{
   albumartist?: string,
@@ -85,3 +137,30 @@ export interface SaveMusicPayload {
 export interface RemoveMusicPayload {
   filePaths: Music['path'][];
 }
+
+export type SearchMusicRequestPayload = string;
+
+export type SearchMusicSuccessPayload = MusicState['search'];
+
+export interface Option {
+  value?: string | number,
+  label: string,
+}
+
+export type FieldKeys = keyof Omit<Metadata, 'year' | 'picture'>;
+
+export interface InputState {
+  values: InputValues,
+  options: InputOptions,
+  picture: InputPicture,
+}
+
+export type InputPicture = string | undefined;
+
+export type InputValues = {
+  [key in FieldKeys]: Option;
+};
+
+export type InputOptions = {
+  [key in FieldKeys]: Option[];
+};

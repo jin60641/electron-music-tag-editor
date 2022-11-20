@@ -10,28 +10,54 @@ export const setCount = (win: BrowserWindow, count: number) => {
   win.webContents.send('MUSIC.SET_COUNT', count);
 };
 
-export const removeMusic = (win: BrowserWindow, filePath: string) => {
-  win.webContents.send('MUSIC.REMOVE_MUSIC', ({ filePaths: [filePath] }));
+export const removeMusics = (win: BrowserWindow, filePaths: string[]) => {
+  win.webContents.send('MUSIC.REMOVE_MUSICS', ({ filePaths }));
 };
 
-export const addMusic = (win: BrowserWindow, filePath: string) => {
-  if (!fs.existsSync(filePath)) {
-    return removeMusic(win, filePath);
+export const searchMusic = (win: BrowserWindow, result: any[]) => {
+  if (result.length) {
+    win.webContents.send('MUSIC.SEARCH_MUSIC#SUCCESS', result);
+  } else {
+    win.webContents.send('MUSIC.SEARCH_MUSIC#FAILURE');
   }
-  win.webContents.send('MUSIC.ADD_MUSIC', ({
-    metadata: NodeID3.read(filePath, { noRaw: true }),
-    path: filePath,
-  }));
 };
 
-export const saveMusic = (win: BrowserWindow, filePath: string) => {
-  if (!fs.existsSync(filePath)) {
-    return removeMusic(win, filePath);
+export const addMusics = (win: BrowserWindow, filePaths: string[]) => {
+  const removedPaths: any = [];
+  const musics = filePaths.reduce((arr: any, filePath) => {
+    const isExist = fs.existsSync(filePath);
+    if (!isExist) {
+      removedPaths.push(filePath);
+      return arr;
+    }
+    return arr.concat([{
+      metadata: NodeID3.read(filePath, { noRaw: true }),
+      path: filePath,
+    }]);
+  }, []);
+  removeMusics(win, removedPaths);
+  if (musics.length) {
+    win.webContents.send('MUSIC.ADD_MUSICS', musics);
   }
-  win.webContents.send('MUSIC.UPDATE_MUSIC', ({
-    metadata: NodeID3.read(filePath, { noRaw: true }),
-    path: filePath,
-  }));
+};
+
+export const saveMusics = (win: BrowserWindow, filePaths: string[]) => {
+  const removedPaths: any = [];
+  const musics = filePaths.reduce((arr: any, filePath) => {
+    const isExist = fs.existsSync(filePath);
+    if (!isExist) {
+      removedPaths.push(filePath);
+      return arr;
+    }
+    return arr.concat([{
+      metadata: NodeID3.read(filePath, { noRaw: true }),
+      path: filePath,
+    }]);
+  }, []);
+  removeMusics(win, removedPaths);
+  if (musics.length) {
+    win.webContents.send('MUSIC.UPDATE_MUSIC', musics);
+  }
 };
 
 export const openPreference = (win: BrowserWindow) => {

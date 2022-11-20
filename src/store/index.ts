@@ -5,6 +5,7 @@ import { persistStore } from 'redux-persist';
 import { ActionCreator, getType } from 'typesafe-actions';
 
 import rootEpic from './epic';
+import actions from './music/actions';
 import rootReducer from './reducer';
 import { channels, RootAction, RootState } from './types';
 
@@ -26,7 +27,13 @@ const store = createStore(
 
 epicMiddleware.run(rootEpic);
 
-const persistor = persistStore(store);
+const persistHandler = () => {
+  const state = store.getState();
+  const filePaths = state.music.list.map(({ path }) => path);
+  window.bridge.ipc.send(getType(actions.addMusics.request), filePaths);
+};
+
+const persistor = persistStore(store, undefined, persistHandler);
 
 channels.forEach((channel) => {
   window.bridge.ipc.receive(getType(channel as ActionCreator), (data) => {
