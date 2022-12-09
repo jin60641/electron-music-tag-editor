@@ -156,36 +156,23 @@ const createWindow = async () => {
         { role: 'paste' },
         ...(isMac ? [
           { role: 'pasteAndMatchStyle' },
-          { role: 'delete' },
-          { role: 'selectAll' },
-          { type: 'separator' },
-          {
-            label: 'Speech',
-            submenu: [
-              { role: 'startspeaking' },
-              { role: 'stopspeaking' },
-            ],
-          },
-        ] : [
-          { role: 'delete' },
-          { type: 'separator' },
-          { role: 'selectAll' },
-        ]),
+        ] : []),
+        { role: 'delete' },
+        { role: 'selectAll' },
+        { type: 'separator' },
       ],
     },
     // { role: 'viewMenu' }
     {
       label: 'View',
       submenu: [
-        { role: 'reload' },
-        { role: 'forcereload' },
-        { role: 'toggledevtools' },
-        { type: 'separator' },
         { role: 'resetzoom' },
         { role: 'zoomin' },
         { role: 'zoomout' },
         { type: 'separator' },
         { role: 'togglefullscreen' },
+        { type: 'separator' },
+        { role: 'toggledevtools' },
       ],
     },
     // { role: 'windowMenu' }
