@@ -326,7 +326,7 @@ const Table: React.FC = () => {
 
   const dispatchRemoveMusics = useCallback(() => {
     const filePaths = selectedRows.map(({ path }) => path);
-    dispatch(musicActions.removeMusic({ filePaths }));
+    dispatch(musicActions.removeMusics({ filePaths }));
   }, [dispatch, selectedRows]);
 
   const handleClickRemoveColumn = useCallback(() => {
@@ -536,7 +536,6 @@ const Table: React.FC = () => {
                       >
                         {!!contextAnchor.column && (
                           <MenuItem onClick={handleClickRemoveColumn}>
-                            {console.log(t(contextAnchor.column.dataKey))}
                             {t('remove_column', { column: t(contextAnchor.column.dataKey) })}
                           </MenuItem>
                         )}

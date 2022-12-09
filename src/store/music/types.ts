@@ -18,7 +18,7 @@ export enum Actions {
   SELECT_MUSIC_MULTI = 'MUSIC.SELECT_MUSIC_MULTI',
   SELECT_MUSIC_ALL = 'MUSIC.SELECT_MUSIC_ALL',
   RESET_MUSIC = 'MUSIC.RESET_MUSIC',
-  REMOVE_MUSIC = 'MUSIC.REMOVE_MUSIC',
+  REMOVE_MUSICS = 'MUSIC.REMOVE_MUSICS',
 
   OPEN_MUSIC_REQUEST = 'MUSIC.OPEN_MUSIC',
   OPEN_MUSIC_SUCCESS = 'MUSIC.OPEN_MUSIC#SUCCESS',
@@ -135,7 +135,7 @@ export interface SaveMusicPayload {
   metadata: Partial<Metadata>;
 }
 
-export interface RemoveMusicPayload {
+export interface RemoveMusicsPayload {
   filePaths: Music['path'][];
 }
 

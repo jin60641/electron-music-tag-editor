@@ -8,7 +8,7 @@ import {
   InputValues,
   Music,
   OpenMusicRequestPayload,
-  RemoveMusicPayload,
+  RemoveMusicsPayload,
   SaveMusicPayload,
   SearchMusicRequestPayload,
   SearchMusicSuccessPayload,
@@ -51,9 +51,9 @@ const resetMusic = createAction(
   Actions.RESET_MUSIC,
 )();
 
-const removeMusic = createAction(
-  Actions.REMOVE_MUSIC,
-)<RemoveMusicPayload>();
+const removeMusics = createAction(
+  Actions.REMOVE_MUSICS,
+)<RemoveMusicsPayload>();
 
 const openMusic = createAsyncAction(
   Actions.OPEN_MUSIC_REQUEST,
@@ -121,7 +121,7 @@ export default {
   selectMusicMulti,
   searchMusic,
   setCount,
-  removeMusic,
+  removeMusics,
   setLastSelected,
   openFinder,
   setInputOptions,
