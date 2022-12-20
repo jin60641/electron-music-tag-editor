@@ -6,7 +6,7 @@ declare module '*.png' {
 declare global {
   interface Window {
     bridge: {
-      storage: any,
+      storage: Storage,
       copyImage: (imgUrl: string) => void,
       pasteImage: () => Uint8Array,
       ipc: {
