@@ -18,6 +18,10 @@ contextBridge.exposeInMainWorld(
       const image = clipboard.readImage();
       return image.toPNG();
     },
+    pasteText: () => {
+      const text = clipboard.readText();
+      return text;
+    },
     ipc: {
       send: (channel: string, data: any) => {
         ipcRenderer.send(channel, data);

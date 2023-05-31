@@ -224,6 +224,9 @@ const ImageInput: FC = () => {
       const blob = new Blob([buffer], { type: 'image/png' });
       const url = await readFileSync(blob);
       handleChangeUrl({ url, buffer });
+    } else {
+      const text = window.bridge.pasteText();
+      handleChangeUrl({ url: text });
     }
     handleClose();
   }, [handleClose, handleChangeUrl]);
@@ -231,7 +234,7 @@ const ImageInput: FC = () => {
   useEffect(() => {
     if (typeof value === 'string') {
       handleChangeUrl({ url: value, isExternal: `${value}`.startsWith('http') });
-    } else {
+    } else if (typeof value !== 'object') { // array buffer
       handleChangeUrl({});
     }
   }, [value, handleChangeUrl]);
