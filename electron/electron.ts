@@ -252,15 +252,19 @@ const createWindow = async () => {
       ...metadata
     },
   }) => {
-    const tags = {
+    const rawTags = {
       ...metadata,
       comment,
       trackNumber,
       partOfSet,
       performerInfo,
     };
+    const tags = Object.entries(rawTags).reduce((obj, [key, value]) => (value === undefined ? obj : {
+      ...obj,
+      [key]: value,
+    }), {} as typeof rawTags);
 
-    if (comment) {
+    if (tags.comment) {
       tags.comment = {
         language: 'eng',
         text: comment,
