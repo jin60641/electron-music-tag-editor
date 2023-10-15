@@ -58,7 +58,7 @@
     "electron:build": "yarn tsc -p ./electron/tsconfig.json",
     "electron:dev": "yarn tsc --watch -p ./electron/tsconfig.json",
     "electron": "nodemon --exec \"\"electron .\"\"",
-    "start": "concurrently \"yarn electron:dev\" \"yarn react:start\" \"wait-on http://localhost:3000 && yarn electron\"",
+    "start": "concurrently \"yarn electron:dev\" \"yarn react:start\" \"yarn electron\"",
     "build": "yarn react:build && yarn electron:build && electron-builder --config \"electron-builder.json\" ",
     "lint": "eslint -c .eslintrc.js '{src,electron}/**/*.{ts,tsx}'"
   },
@@ -97,7 +97,6 @@
     "eslint-plugin-jsx-a11y": "^6.3.1",
     "eslint-plugin-react": "^7.20.3",
     "eslint-plugin-react-hooks": "^4.0.8",
-    "nodemon": "^2.0.6",
-    "wait-on": "^6.0.1"
+    "nodemon": "^2.0.6"
   }
 }
