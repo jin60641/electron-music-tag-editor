@@ -1,4 +1,6 @@
+import 'dotenv/config';
 import { enable, initialize } from '@electron/remote/main';
+import https from 'https';
 import axios from 'axios';
 import {
   app,
@@ -24,6 +26,7 @@ import {
   setCount,
 } from './apis';
 
+https.globalAgent.options.rejectUnauthorized = false;
 axios.defaults.baseURL = 'https://api.discogs.com';
 axios.defaults.headers.common = { Authorization: `Discogs token=${process.env.DISCOGS_API_TOKEN}` };
 
