@@ -137,6 +137,7 @@ export interface SaveMusicPayload {
 
 export interface RemoveMusicsPayload {
   filePaths: Music['path'][];
+  shouldRemoveFiles: boolean,
 }
 
 export type SearchMusicRequestPayload = string;

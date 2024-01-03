@@ -30,9 +30,11 @@ import { Music } from 'store/music/types';
 import tableActions from 'store/table/actions';
 import { DataKey } from 'store/table/types';
 import { RootState } from 'store/types';
+import { getFilenameFromPath } from 'utils/common';
 
 import Check from './Check';
 import Picture from './Picture';
+import RemoveConfirm from './RemoveConfirm';
 import TableBodyCell from './TableBodyCell';
 import TableHeaderCell from './TableHeaderCell';
 
@@ -107,8 +109,6 @@ const cellDataGetter: ColumnProps['cellDataGetter'] = ({
   dataKey,
   rowData,
 }) => rowData.metadata[dataKey];
-
-const getFilenameFromPath = (path: string) => path.split('/').slice(-1);
 
 const COLUMNS: Columns = {
   isSelected: {
@@ -222,6 +222,7 @@ const Table: React.FC = () => {
   const classes = useStyles();
   const { t } = useTranslation();
 
+  const [isRemoveConfirmOpen, setIsRemoveConfirmOpen] = useState<boolean>(false);
   const [isFileDragging, setIsFileDragging] = useState(false);
   const [isHeaderDragging, setIsHeaderDragging] = useState(false);
   const [contextAnchor, setContextAnchor] = React.useState<{
@@ -324,10 +325,9 @@ const Table: React.FC = () => {
     }
   }, [columns]);
 
-  const dispatchRemoveMusics = useCallback(() => {
-    const filePaths = selectedRows.map(({ path }) => path);
-    dispatch(musicActions.removeMusics({ filePaths }));
-  }, [dispatch, selectedRows]);
+  const openRemoveConfirm = useCallback(() => {
+    setIsRemoveConfirmOpen(true);
+  }, []);
 
   const handleClickRemoveColumn = useCallback(() => {
     if (contextAnchor.column && columns.length) {
@@ -339,9 +339,9 @@ const Table: React.FC = () => {
   const handleClickRemoveRow = useCallback(() => {
     if (contextAnchor.row) {
       handleCloseContextMenu();
-      dispatchRemoveMusics();
+      openRemoveConfirm();
     }
-  }, [contextAnchor, handleCloseContextMenu, dispatchRemoveMusics]);
+  }, [contextAnchor, handleCloseContextMenu, openRemoveConfirm]);
 
   const tableProps = {
     rowHeight,
@@ -393,14 +393,14 @@ const Table: React.FC = () => {
         0,
       )));
     } else if (key === 'Backspace') {
-      dispatchRemoveMusics();
+      openRemoveConfirm();
     } else if (key === ' ' && lastSelected !== undefined) {
       dispatch(musicActions.selectMusicAdd(lastSelected));
     } else if (key === 'a' && (ctrlKey || metaKey)) {
       e.preventDefault();
       dispatch(musicActions.selectMusicAll(true));
     }
-  }, [dispatch, lastSelected, rows, dispatchRemoveMusics]);
+  }, [dispatch, lastSelected, rows, openRemoveConfirm]);
 
   const handleClickOpenFinder = useCallback((e) => {
     e.persist();
@@ -542,9 +542,11 @@ const Table: React.FC = () => {
                         {!!contextAnchor.row && (
                           <MenuItem onClick={handleClickRemoveRow}>
                             {t('removeRow', {
-                              row: contextAnchor.row.metadata.title
+                              rowCount: t('rowCount', {
+                                row: contextAnchor.row.metadata.title
                                 || getFilenameFromPath(contextAnchor.row.path),
-                              count: selectedRows.length - 1,
+                                count: selectedRows.length - 1,
+                              }),
                             })}
                           </MenuItem>
                         )}
@@ -574,6 +576,7 @@ const Table: React.FC = () => {
         />
       </div>
       <Search />
+      <RemoveConfirm isOpen={isRemoveConfirmOpen} selectedRows={selectedRows} onClose={() => setIsRemoveConfirmOpen(false)} />
     </>
   );
 };

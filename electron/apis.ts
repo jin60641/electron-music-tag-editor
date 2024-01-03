@@ -35,7 +35,9 @@ export const addMusics = (win: BrowserWindow, filePaths: string[]) => {
       path: filePath,
     }]);
   }, []);
-  removeMusics(win, removedPaths);
+  if (removedPaths.length) {
+    removeMusics(win, removedPaths);
+  }
   if (musics.length) {
     win.webContents.send('MUSIC.ADD_MUSICS', musics);
   }

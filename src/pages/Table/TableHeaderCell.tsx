@@ -13,7 +13,6 @@ import {
   SortDirection,
 } from 'react-virtualized';
 
-import { Metadata } from 'store/music/types';
 import tableActions from 'store/table/actions';
 import { DataKey } from 'store/table/types';
 import { RootState } from 'store/types';

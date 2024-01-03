@@ -15,7 +15,7 @@ import { Epic } from '../types';
 import { createAsyncEpic } from '../utils';
 
 import actions from './actions';
-import { requestSaveMusic } from './apis';
+import { requestRemoveMusics, requestSaveMusic } from './apis';
 
 const openMusicEpic = createAsyncEpic(actions.openMusic, bufferToMusic, concatMap);
 const addMusicsEpic = createAsyncEpic(actions.addMusics, bufferToMusics, concatMap);
@@ -28,6 +28,13 @@ const saveMusicRequestEpic: Epic = (action$) => action$.pipe(
   )),
 );
 
+const removeMusicsRequestEpic: Epic = (action$) => action$.pipe(
+  filter(isActionOf(actions.removeMusics)),
+  filter(action => !!action.payload.shouldRemoveFiles),
+  mergeMap((action) => from(requestRemoveMusics(action.payload)).pipe(
+    mergeMap(() => []),
+  )),
+);
 const selectMusicEpic: Epic = (action$, state) => action$.pipe(
   filter(isActionOf([
     actions.selectMusic,
@@ -61,6 +68,7 @@ export default combineEpics(
   openMusicEpic,
   addMusicsEpic,
   updateMusicsEpic,
+  removeMusicsRequestEpic,
   saveMusicRequestEpic,
   selectMusicEpic,
   searchMusicFailureEpic,

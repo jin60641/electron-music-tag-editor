@@ -23,7 +23,7 @@ const selector = ({ music: { list }, table: { search }, layout: { search: isVisi
   list,
 });
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
   root: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -69,7 +69,6 @@ const Search = () => {
   };
 
   const handleKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (e) => {
-    const { key } = e;
     if (e.key === 'Enter') {
       const nextIndex = (index + 1) % searched.length;
       setIndex(nextIndex);

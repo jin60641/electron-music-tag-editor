@@ -15,7 +15,7 @@ import {
 
 const transform = createTransform((state: MusicState['list'], key) => (key === 'list' ? state.map(({
   metadata: {
-    picture,
+    picture: _picture,
     ...metadata
   },
   ...item

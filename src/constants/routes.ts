@@ -1,5 +1,3 @@
-import { FC } from 'react';
-
 import { RouteProps } from 'react-router-dom';
 
 interface Route extends RouteProps {

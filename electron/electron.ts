@@ -1,6 +1,5 @@
 import 'dotenv/config';
 import { enable, initialize } from '@electron/remote/main';
-import https from 'https';
 import axios from 'axios';
 import {
   app,
@@ -14,8 +13,10 @@ import {
 import fetch from 'electron-fetch';
 import * as fs from 'fs';
 import * as glob from 'glob';
+import https from 'https';
 import * as NodeID3 from 'node-id3';
 import * as path from 'path';
+import trash from 'trash';
 
 import {
   addMusics,
@@ -209,6 +210,10 @@ const createWindow = async () => {
 
   const menu = Menu.buildFromTemplate(template as MenuItemConstructorOptions[]);
   Menu.setApplicationMenu(menu);
+
+  ipcMain.on('MUSIC.REMOVE_MUSICS', async  (_event, { filePaths }) => {
+    await trash(filePaths);
+  });
 
   ipcMain.on('MUSIC.OPEN_FINDER', (_event, filePath) => {
     shell.showItemInFolder(filePath);

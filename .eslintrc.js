@@ -11,8 +11,10 @@ module.exports = {
   ],
   rules: {
     'consistent-return': 'off',
-    '@typescript-eslint/no-unused-vars': 'off',
-    // '@typescript-eslint/no-unused-vars-experimental': 'error',
+    '@typescript-eslint/no-unused-vars': ['error', {
+      varsIgnorePattern: '_',
+      argsIgnorePattern: '_',
+    }],
     'react/jsx-props-no-spreading': 'off',
     'import/prefer-default-export': 'off',
     'import/first': 'error',
