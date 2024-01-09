@@ -213,7 +213,7 @@ const ImageInput: FC = () => {
 
   const handleCopy = useCallback(() => {
     if (imgUrl) {
-      window.bridge.copyImage(imgUrl);
+      window.bridge.ipc.send(getType(actions.copyImage), imgUrl);
     }
     handleClose();
   }, [handleClose, imgUrl]);
@@ -296,7 +296,7 @@ const ImageInput: FC = () => {
             component='a'
             href={imgUrl}
             onClick={handleClose}
-            download
+            download='download'
           >
             {t('download')}
           </MenuItem>

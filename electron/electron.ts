@@ -4,13 +4,14 @@ import axios from 'axios';
 import {
   app,
   BrowserWindow,
+  clipboard,
   dialog,
   ipcMain,
   Menu,
   MenuItemConstructorOptions,
+  nativeImage,
   shell,
 } from 'electron';
-import fetch from 'electron-fetch';
 import * as fs from 'fs';
 import * as glob from 'glob';
 import https from 'https';
@@ -26,6 +27,7 @@ import {
   searchMusic,
   setCount,
 } from './apis';
+import { urlToBuffer } from './utils';
 
 https.globalAgent.options.rejectUnauthorized = false;
 axios.defaults.baseURL = 'https://api.discogs.com';
@@ -238,17 +240,44 @@ const createWindow = async () => {
   });
 
   ipcMain.on('MUSIC.SEARCH_MUSIC', (_event, query) => {
-    axios.get<any>(`/database/search?q=${encodeURIComponent(query)}&page=1&per_page=5`)
+    axios.get<{ results?: { cover_image: string, title: string }[]  }>(`/database/search?q=${encodeURIComponent(query)}&page=1&per_page=5`)
       .then(({ data }) => {
         if (data?.results?.length) {
-          const result = data.results.map((item: any) => ({ picture: item.cover_image }));
+          const result = data.results.map(({ title, cover_image: picture }) => {
+            var i = title?.indexOf(' - ');
+            var [artist, album] = [title.slice(0, i), title.slice(i + 1)];
+
+            return {
+              picture,
+              artist,
+              album,
+            };
+          });
           searchMusic(win, result);
         } else {
           searchMusic(win, []);
         }
-      }).catch((e) => { console.log(e); });
+      }).catch(() => {
+        searchMusic(win, []);
+      });
   });
-
+  ipcMain.on('MUSIC.COPY_IMAGE', async (_event, imageUrl: Uint8Array | string) => {
+    let image;
+    if (imageUrl instanceof Uint8Array) {
+      image = nativeImage.createFromBuffer(Buffer.from(imageUrl));
+    } else if (imageUrl.startsWith('data:')) { // data url
+      image = nativeImage.createFromDataURL(imageUrl);
+    } else if (/https?:\/\//.test(imageUrl)) { // external file path (ex. https://your.web/img.jpg)
+      const buffer = await urlToBuffer(imageUrl);
+      image = nativeImage.createFromBuffer(buffer);
+    } else if (fs.existsSync(imageUrl)) { // local file path
+      image = nativeImage.createFromPath(imageUrl);
+    }
+    if (image) {
+      console.log(image.getSize(), imageUrl);
+      clipboard.writeImage(image);
+    }
+  });
   ipcMain.on('MUSIC.SAVE_MUSIC', async (_event, {
     filePaths,
     metadata: {
@@ -283,9 +312,7 @@ const createWindow = async () => {
       if (image instanceof Uint8Array) {
         tags.image = Buffer.from(image);
       } else if (/https?:\/\//.test(image) && !fs.existsSync(image)) { // external file path (ex. https://your.web/img.jpg)
-        const response = await fetch(image);
-        const arrayBuffer = await response.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
+        const buffer = await urlToBuffer(image);
         tags.image = buffer;
       } else { // local file path (ex. ~/img.jpg) or empty string
         tags.image = image;

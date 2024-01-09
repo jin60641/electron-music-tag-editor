@@ -108,6 +108,7 @@ const setInputOptions = createAction(Actions.SET_INPUT_OPTIONS)<InputOptions>();
 const setInputValues = createAction(Actions.SET_INPUT_VALUES)<InputValues>();
 const setInputPicture = createAction(Actions.SET_INPUT_PICTURE)<InputPicture>();
 const resetSearch = createAction(Actions.RESET_SEARCH)();
+const copyImage = createAction(Actions.COPY_IMAGE)();
 
 export default {
   openMusic,
@@ -129,4 +130,5 @@ export default {
   setInputPicture,
   updateInput,
   resetSearch,
+  copyImage,
 };

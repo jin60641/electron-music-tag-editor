@@ -7,6 +7,7 @@ import {
   SetColumnOrderPayload,
   SetColumnsPayload,
   SetColumnWidthPayload,
+  SetSearchSettingPayload,
   SetSortPayload,
 } from './types';
 
@@ -16,7 +17,8 @@ const setSort = createAction(Actions.SET_SORT)<SetSortPayload>();
 const addColumn = createAction(Actions.ADD_COLUMN)<AddColumnPayload>();
 const removeColumn = createAction(Actions.REMOVE_COLUMN)<RemoveColumnPayload>();
 const setColumns = createAction(Actions.SET_COLUMNS)<SetColumnsPayload>();
-const setSearch = createAction(Actions.SET_SEARCH)<string>();
+const setSearchQuery = createAction(Actions.SET_SEARCH_QUERY)<string>();
+const setSearchSetting = createAction(Actions.SET_SEARCH_SETTING)<SetSearchSettingPayload>();
 
 export default {
   setColumnWidth,
@@ -24,6 +26,7 @@ export default {
   setSort,
   addColumn,
   removeColumn,
-  setSearch,
+  setSearchQuery,
+  setSearchSetting,
   setColumns,
 };

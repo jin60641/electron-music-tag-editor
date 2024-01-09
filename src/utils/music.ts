@@ -29,7 +29,7 @@ export const bufferToMusic: (payload: OpenMusicRequestPayload) => Promise<Music>
     disk,
     comment,
     picture: image
-      ? await readFileSync(new Blob([image.imageBuffer as unknown as BlobPart], { type: `image/${image.mime}` }))
+      ? await readFileSync(new Blob([image.imageBuffer as unknown as BlobPart], { type: image.mime }))
       : undefined,
   },
 });

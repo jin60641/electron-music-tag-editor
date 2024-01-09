@@ -16,7 +16,11 @@ export interface TableState {
   rowHeight: number,
   sortBy: DataKey,
   sortDirection: typeof SortDirection.ASC | typeof SortDirection.DESC,
-  search: string,
+  searchQuery: string,
+  searchSetting: {
+    shouldFilter: boolean,
+    shouldHighlight: boolean,
+  },
 }
 
 export enum Actions {
@@ -26,9 +30,11 @@ export enum Actions {
   ADD_COLUMN = 'TABLE.ADD_COLUMN',
   REMOVE_COLUMN = 'TABLE.REMOVE_COLUMN',
   SET_COLUMNS = 'TABLE.SET_COLUMNS',
-  SET_SEARCH = 'TABLE.SET_SEARCH',
+  SET_SEARCH_QUERY = 'TABLE.SET_SEARCH_QUERY',
+  SET_SEARCH_SETTING = 'TABLE.SET_SEARCH_SETTING',
 }
 
+export type SetSearchSettingPayload = TableState['searchSetting'];
 export type SetSortPayload = Pick<TableState, 'sortBy' | 'sortDirection'>;
 
 export type ColumnWidth = {
@@ -87,7 +93,11 @@ export const initialState: TableState = {
   columns: [...initialColumns],
   sortBy: 'title',
   sortDirection: SortDirection.ASC,
-  search: '',
+  searchQuery: '',
+  searchSetting: {
+    shouldFilter: true,
+    shouldHighlight: true,
+  },
 };
 
 export interface SetColumnWidthPayload {

@@ -1,19 +1,25 @@
 import { persistReducer } from 'redux-persist';
 import { createReducer } from 'typesafe-actions';
 
+import { RootAction } from '../types';
+
 import tableActions from './actions';
-import { initialState } from './types';
+import { initialState, TableState } from './types';
 
 const persistConfig = {
   key: 'table',
   storage: window.bridge.storage,
-  blacklist: ['search'],
+  blacklist: ['searchQuery'],
 };
 
-const tableReducer = createReducer(initialState)
-  .handleAction(tableActions.setSearch, (state, action) => ({
+const tableReducer = createReducer<TableState, RootAction>(initialState)
+  .handleAction(tableActions.setSearchQuery, (state, action) => ({
     ...state,
-    search: action.payload,
+    searchQuery: action.payload,
+  }))
+  .handleAction(tableActions.setSearchSetting, (state, action) => ({
+    ...state,
+    searchSetting: action.payload,
   }))
   .handleAction(tableActions.setColumnWidth, (state, action) => {
     const columns = [...state.columns];

@@ -47,6 +47,7 @@ export enum Actions {
   RESET_SEARCH = 'MUSIC.RESET_SEARCH',
 
   OPEN_FINDER = 'MUSIC.OPEN_FINDER',
+  COPY_IMAGE = 'MUSIC.COPY_IMAGE',
 }
 
 export const defaultOption = { label: 'keep', value: undefined };

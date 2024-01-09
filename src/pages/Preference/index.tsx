@@ -12,6 +12,7 @@ import { RootState } from 'store/types';
 
 import Columns from './Columns';
 import Language from './Language';
+import Search from './Search';
 import Theme from './Theme';
 
 const useStyles = makeStyles((theme) => ({
@@ -47,6 +48,7 @@ const Map: {
   [PreferenceState.columns]: Columns,
   [PreferenceState.themes]: Theme,
   [PreferenceState.language]: Language,
+  [PreferenceState.search]: Search,
 };
 
 const Preference: React.FC = () => {

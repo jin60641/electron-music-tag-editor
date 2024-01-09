@@ -17,7 +17,7 @@ import tableActions from 'store/table/actions';
 import { RootState } from 'store/types';
 
 
-const selector = ({ music: { list }, table: { search }, layout: { search: isVisible } }: RootState) => ({
+const selector = ({ music: { list }, table: { searchQuery: search }, layout: { search: isVisible } }: RootState) => ({
   search,
   isVisible,
   list,
@@ -48,7 +48,7 @@ const Search = () => {
   const dispatch = useDispatch();
   const handleClose = () => {
     dispatch(layoutActions.setSearch(false));
-    dispatch(tableActions.setSearch(''));
+    dispatch(tableActions.setSearchQuery(''));
   };
   useEffect(() => {
     const handleKeyDownDocument = (e: KeyboardEvent) => {
@@ -65,7 +65,7 @@ const Search = () => {
 
   const handleChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
     setIndex(0);
-    dispatch(tableActions.setSearch(e.target.value));
+    dispatch(tableActions.setSearchQuery(e.target.value));
   };
 
   const handleKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (e) => {

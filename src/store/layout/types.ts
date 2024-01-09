@@ -10,6 +10,7 @@ export enum PreferenceState {
   columns = 'columns',
   themes = 'themes',
   language = 'language',
+  search = 'search',
 }
 
 export enum Actions {

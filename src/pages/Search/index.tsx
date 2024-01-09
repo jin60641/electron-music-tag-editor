@@ -104,7 +104,7 @@ const Preference: React.FC = () => {
     }
   }, [list]);
 
-  const handleSubmit = useCallback(() => {
+  const handleSubmit = useCallback(async () => {
     dispatch(musicActions.setInputPicture(selected));
     handleClose();
   }, [selected, dispatch, handleClose]);

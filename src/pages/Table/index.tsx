@@ -32,6 +32,7 @@ import { DataKey } from 'store/table/types';
 import { RootState } from 'store/types';
 import { getFilenameFromPath } from 'utils/common';
 
+import { highlight } from './CellText';
 import Check from './Check';
 import Picture from './Picture';
 import RemoveConfirm from './RemoveConfirm';
@@ -186,6 +187,8 @@ const selector = ({
     sortDirection,
     rowHeight,
     headerHeight,
+    searchQuery,
+    searchSetting: { shouldFilter },
   },
   layout: { drawer: isDrawerOpen },
 }: RootState) => ({
@@ -200,6 +203,8 @@ const selector = ({
   headerHeight,
   isDrawerOpen,
   lastSelected,
+  searchQuery,
+  shouldFilter,
 });
 
 const initialContextAnchor = {
@@ -218,6 +223,8 @@ const Table: React.FC = () => {
     headerHeight,
     isDrawerOpen,
     lastSelected,
+    shouldFilter,
+    searchQuery,
   } = useSelector(selector, shallowEqual);
   const classes = useStyles();
   const { t } = useTranslation();
@@ -232,21 +239,30 @@ const Table: React.FC = () => {
     row?: Music;
   }>(initialContextAnchor);
 
-  const rows = useMemo(() => (!sortBy) ? list : list.sort((a, b) => {
-    const column = COLUMNS[sortBy].cellDataGetter;
-    if (!column) {
-      return 1;
-    }
-    const lValue = column({ rowData: a, dataKey: sortBy }) || '';
-    const rValue = column({ rowData: b, dataKey: sortBy }) || '';
-    if (lValue === rValue) {
-      return 1;
-    }
-    return ((lValue < rValue)
-      ? 1
-      : -1
-    ) * (sortDirection === SortDirection.ASC ? -1 : 1);
-  }), [sortBy, sortDirection, list]);
+  const rows = useMemo(() => {
+    const filteredList = (shouldFilter && searchQuery.length) ? list.filter(rowData => !!columns
+      .filter(({ dataKey }) => COLUMNS[dataKey].cellDataGetter === cellDataGetter)
+      .map(({ dataKey }) => highlight(cellDataGetter({ rowData, dataKey }), searchQuery))
+      .filter(({ matched }) => matched.length)
+      .length,
+    ) : list;
+    const sortedList = sortBy ? filteredList.sort((a, b) => {
+      const column = COLUMNS[sortBy].cellDataGetter;
+      if (!column) {
+        return 1;
+      }
+      const lValue = column({ rowData: a, dataKey: sortBy }) || '';
+      const rValue = column({ rowData: b, dataKey: sortBy }) || '';
+      if (lValue === rValue) {
+        return 1;
+      }
+      return ((lValue < rValue)
+        ? 1
+        : -1
+      ) * (sortDirection === SortDirection.ASC ? -1 : 1);
+    }) : filteredList;
+    return sortedList;
+  }, [sortBy, sortDirection, list, shouldFilter, columns, searchQuery]);
 
   const selectedRows = useMemo(() => rows.filter(({ isSelected }) => !!isSelected), [rows]);
 

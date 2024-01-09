@@ -61,7 +61,7 @@
     "electron:build": "yarn tsc -p ./electron/tsconfig.json",
     "electron:dev": "yarn tsc --watch -p ./electron/tsconfig.json",
     "electron": "nodemon --exec \"\"electron .\"\"",
-    "start": "concurrently \"yarn electron:dev\" \"yarn react:start\" \"yarn electron\"",
+    "start": "concurrently -k \"yarn electron:dev\" \"yarn react:start\" \"yarn electron\"",
     "build": "yarn react:build && yarn electron:build && electron-builder --config \"electron-builder.json\" ",
     "lint": "eslint -c .eslintrc.js '{src,electron}/**/*.{ts,tsx}'"
   },
