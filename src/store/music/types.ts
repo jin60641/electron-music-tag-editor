@@ -50,7 +50,7 @@ export enum Actions {
   COPY_IMAGE = 'MUSIC.COPY_IMAGE',
 }
 
-export const defaultOption = { label: 'keep', value: undefined };
+export const defaultOption = { label: 'keep', value: undefined, hint: 'keep_hint' };
 
 export const initialInputValues: InputValues = {
   title: defaultOption,
@@ -148,6 +148,7 @@ export type SearchMusicSuccessPayload = MusicState['search'];
 export interface Option {
   value?: string | number,
   label: string,
+  hint?: string,
 }
 
 export type FieldKeys = keyof Omit<Metadata, 'year' | 'picture'>;
